@@ -1,0 +1,30 @@
+{
+  "name": "feedmob-pixel-cli",
+  "version": "0.1.0",
+  "description": "FeedMob Pixel Dashboard data query CLI",
+  "type": "module",
+  "bin": {
+    "feedpix": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "commander": "^14.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "license": "UNLICENSED",
+  "private": true
+}
