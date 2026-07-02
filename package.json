@@ -8,6 +8,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build",
+    "prepack": "npm run build",
     "test": "vitest run"
   },
   "engines": {
@@ -25,6 +27,5 @@
     "dist",
     "README.md"
   ],
-  "license": "UNLICENSED",
-  "private": true
+  "license": "UNLICENSED"
 }

@@ -1,0 +1,19 @@
+import { readFile } from 'node:fs/promises'
+import { describe, expect, test } from 'vitest'
+
+describe('npm package metadata', () => {
+  test('supports npm installation with a bin entry and build lifecycle hooks', async () => {
+    const packageJson = JSON.parse(await readFile('package.json', 'utf8')) as {
+      private?: boolean
+      bin?: Record<string, string>
+      scripts?: Record<string, string>
+      files?: string[]
+    }
+
+    expect(packageJson.private).not.toBe(true)
+    expect(packageJson.bin).toEqual({ feedpix: './dist/cli.js' })
+    expect(packageJson.scripts?.prepare).toBe('npm run build')
+    expect(packageJson.scripts?.prepack).toBe('npm run build')
+    expect(packageJson.files).toContain('dist')
+  })
+})
