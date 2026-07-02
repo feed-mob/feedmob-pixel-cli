@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, test } from 'vitest'
-import { buildProgram } from '../src/cli.js'
+import { buildProgram, main } from '../src/cli.js'
 import { loadConfig } from '../src/config.js'
 
 const tempDirs: string[] = []
@@ -20,6 +20,35 @@ afterEach(async () => {
 })
 
 describe('cli', () => {
+  test('version exits successfully under the top-level main handler', async () => {
+    const stdout = process.stdout.write
+    const stderr = process.stderr.write
+    const previousExitCode = process.exitCode
+    let output = ''
+    let errorOutput = ''
+
+    process.exitCode = undefined
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      output += chunk.toString()
+      return true
+    }) as typeof process.stdout.write
+    process.stderr.write = ((chunk: string | Uint8Array) => {
+      errorOutput += chunk.toString()
+      return true
+    }) as typeof process.stderr.write
+
+    try {
+      await main(['node', 'feedpix', '--version'])
+    } finally {
+      process.stdout.write = stdout
+      process.stderr.write = stderr
+      process.exitCode = previousExitCode
+    }
+
+    expect(output.trim()).toBe('0.1.0')
+    expect(errorOutput).toBe('')
+  })
+
   test('init accepts its local --base-url option and does not store a token by default', async () => {
     const dir = await tempConfigDir()
     const previousConfigDir = process.env.FEEDPIX_CONFIG_DIR

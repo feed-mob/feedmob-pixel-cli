@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { pathToFileURL } from 'node:url'
+import { realpathSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { Command, CommanderError } from 'commander'
 import { addAdvertisersCommand } from './commands/advertisers.js'
 import { addCategoriesCommand } from './commands/categories.js'
@@ -35,14 +36,17 @@ export function buildProgram(): Command {
   return program
 }
 
-async function main(argv: string[]): Promise<void> {
+export async function main(argv: string[]): Promise<void> {
   const program = buildProgram()
   program.exitOverride()
 
   try {
     await program.parseAsync(argv)
   } catch (error) {
-    if (error instanceof CommanderError && error.code === 'commander.helpDisplayed') {
+    if (
+      error instanceof CommanderError &&
+      (error.code === 'commander.helpDisplayed' || error.code === 'commander.version')
+    ) {
       return
     }
 
@@ -66,5 +70,11 @@ if (isMainModule()) {
 }
 
 function isMainModule(): boolean {
-  return Boolean(process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
+  if (!process.argv[1]) return false
+
+  try {
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1])
+  } catch {
+    return false
+  }
 }

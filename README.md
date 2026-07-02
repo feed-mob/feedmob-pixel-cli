@@ -6,6 +6,30 @@ It uses the Dashboard Bearer-token API, writes stable JSON with `--json`, and do
 
 ## Install
 
+Install with npm from this repo:
+
+```bash
+npm install -g .
+command -v feedpix
+```
+
+Install from a packed tarball:
+
+```bash
+npm pack
+npm install -g ./feedmob-pixel-cli-0.1.0.tgz
+command -v feedpix
+```
+
+After publishing to an npm registry:
+
+```bash
+npm install -g feedmob-pixel-cli
+command -v feedpix
+```
+
+For local development:
+
 ```bash
 pnpm install
 pnpm build
@@ -13,7 +37,7 @@ make install-local
 command -v feedpix
 ```
 
-`make install-local` installs a small wrapper at `~/.local/bin/feedpix`. Ensure `~/.local/bin` is on your `PATH`.
+`make install-local` installs a small wrapper at `~/.local/bin/feedpix`. npm global install links the package-managed `feedpix` binary. Ensure the relevant bin directory is on your `PATH`.
 
 ## Configure
 
