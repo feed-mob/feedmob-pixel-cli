@@ -24,14 +24,14 @@ Install from a packed tarball:
 
 ```bash
 npm pack
-npm install -g ./feedmob-pixel-cli-0.1.0.tgz
+npm install -g ./feedmob-feedmob-pixel-cli-0.1.0.tgz
 command -v feedpix
 ```
 
 After publishing to an npm registry:
 
 ```bash
-npm install -g feedmob-pixel-cli
+npm install -g @feedmob/feedmob-pixel-cli
 command -v feedpix
 ```
 

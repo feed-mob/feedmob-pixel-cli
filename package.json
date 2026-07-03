@@ -1,17 +1,25 @@
 {
-  "name": "feedmob-pixel-cli",
+  "name": "@feedmob/feedmob-pixel-cli",
   "version": "0.1.0",
   "description": "FeedMob Pixel Dashboard data query CLI",
   "type": "module",
   "bin": {
     "feedpix": "./dist/cli.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/feed-mob/feedmob-pixel-cli.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node ./scripts/generate-version.cjs && tsc -p tsconfig.json",
     "prepare": "npm run build",
     "prepack": "npm run build",
     "postinstall": "node ./scripts/postinstall.cjs",
-    "test": "vitest run"
+    "test": "node ./scripts/generate-version.cjs && vitest run"
   },
   "engines": {
     "node": ">=20"
