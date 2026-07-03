@@ -23,7 +23,7 @@ describe('config', () => {
     const dir = await tempConfigDir()
     const state = await loadConfig({ env: {}, configDir: dir })
 
-    expect(state.baseUrl).toEqual({ value: undefined, source: 'missing' })
+    expect(state.baseUrl).toEqual({ value: 'https://feedmob-pixel-dashboard.feedmob.com/', source: 'default' })
     expect(state.token).toEqual({ value: undefined, source: 'missing' })
     expect(state.configPath).toBe(join(dir, 'config.json'))
   })
@@ -121,6 +121,36 @@ describe('config', () => {
     expect(state.token).toEqual({ value: 'fmpat_custom_env_file', source: 'env_file' })
   })
 
+  test('loads token from a configured environment variable name', async () => {
+    const dir = await tempConfigDir()
+    await writeFile(
+      join(dir, 'config.json'),
+      JSON.stringify({ baseUrl: 'https://dashboard.example.com', tokenEnvVar: 'CUSTOM_FEEDPIX_TOKEN' }),
+    )
+
+    const state = await loadConfig({
+      env: {
+        CUSTOM_FEEDPIX_TOKEN: 'fmpat_custom_env',
+      },
+      configDir: dir,
+    })
+
+    expect(state.token).toEqual({ value: 'fmpat_custom_env', source: 'env' })
+  })
+
+  test('loads token from a configured environment variable in the local env file', async () => {
+    const dir = await tempConfigDir()
+    await writeFile(
+      join(dir, 'config.json'),
+      JSON.stringify({ baseUrl: 'https://dashboard.example.com', tokenEnvVar: 'CUSTOM_FEEDPIX_TOKEN' }),
+    )
+    await writeFile(join(dir, '.env'), 'CUSTOM_FEEDPIX_TOKEN=fmpat_custom_env_file\n')
+
+    const state = await loadConfig({ env: {}, configDir: dir })
+
+    expect(state.token).toEqual({ value: 'fmpat_custom_env_file', source: 'env_file' })
+  })
+
   test('writeConfig only stores a token when explicitly provided', async () => {
     const dir = await tempConfigDir()
     await writeConfig({ baseUrl: 'https://dashboard.example.com' }, { configDir: dir })
@@ -131,5 +161,26 @@ describe('config', () => {
     await writeConfig({ baseUrl: 'https://dashboard.example.com', token: 'fmpat_secret' }, { configDir: dir })
     const withToken = await loadConfig({ env: {}, configDir: dir })
     expect(withToken.token).toEqual({ value: 'fmpat_secret', source: 'config' })
+  })
+
+  test('writeConfig can store a token environment variable name without storing a token', async () => {
+    const dir = await tempConfigDir()
+    await writeConfig(
+      { baseUrl: 'https://dashboard.example.com', tokenEnvVar: 'CUSTOM_FEEDPIX_TOKEN' },
+      { configDir: dir },
+    )
+
+    const state = await loadConfig({
+      env: {
+        CUSTOM_FEEDPIX_TOKEN: 'fmpat_custom_env',
+      },
+      configDir: dir,
+    })
+
+    expect(state.rawConfig).toEqual({
+      baseUrl: 'https://dashboard.example.com',
+      tokenEnvVar: 'CUSTOM_FEEDPIX_TOKEN',
+    })
+    expect(state.token).toEqual({ value: 'fmpat_custom_env', source: 'env' })
   })
 })

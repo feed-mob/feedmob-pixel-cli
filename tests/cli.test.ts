@@ -74,4 +74,45 @@ describe('cli', () => {
     expect(state.baseUrl).toEqual({ value: 'http://localhost:3000', source: 'config' })
     expect(state.token.source).toBe('missing')
   })
+
+  test('init can store a token environment variable name without storing a token', async () => {
+    const dir = await tempConfigDir()
+    const previousConfigDir = process.env.FEEDPIX_CONFIG_DIR
+    const stdout = process.stdout.write
+
+    process.env.FEEDPIX_CONFIG_DIR = dir
+    process.stdout.write = (() => true) as typeof process.stdout.write
+
+    try {
+      const program = buildProgram()
+      program.exitOverride()
+      await program.parseAsync([
+        'node',
+        'feedpix',
+        '--json',
+        'init',
+        '--token-env-var',
+        'CUSTOM_FEEDPIX_TOKEN',
+      ])
+    } finally {
+      process.stdout.write = stdout
+      if (previousConfigDir === undefined) {
+        delete process.env.FEEDPIX_CONFIG_DIR
+      } else {
+        process.env.FEEDPIX_CONFIG_DIR = previousConfigDir
+      }
+    }
+
+    const state = await loadConfig({
+      env: {
+        CUSTOM_FEEDPIX_TOKEN: 'fmpat_custom_env',
+      },
+      configDir: dir,
+    })
+    expect(state.rawConfig).toEqual({
+      baseUrl: 'https://feedmob-pixel-dashboard.feedmob.com/',
+      tokenEnvVar: 'CUSTOM_FEEDPIX_TOKEN',
+    })
+    expect(state.token).toEqual({ value: 'fmpat_custom_env', source: 'env' })
+  })
 })
