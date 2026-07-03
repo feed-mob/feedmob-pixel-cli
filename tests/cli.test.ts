@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, test } from 'vitest'
@@ -21,6 +21,9 @@ afterEach(async () => {
 
 describe('cli', () => {
   test('version exits successfully under the top-level main handler', async () => {
+    const packageJson = JSON.parse(await readFile('package.json', 'utf8')) as {
+      version?: string
+    }
     const stdout = process.stdout.write
     const stderr = process.stderr.write
     const previousExitCode = process.exitCode
@@ -45,7 +48,7 @@ describe('cli', () => {
       process.exitCode = previousExitCode
     }
 
-    expect(output.trim()).toBe('0.1.0')
+    expect(output.trim()).toBe(packageJson.version)
     expect(errorOutput).toBe('')
   })
 
