@@ -1,6 +1,7 @@
 import type { Command } from 'commander'
 import { buildDashboardUrl } from '../client.js'
 import { writeConfig } from '../config.js'
+import { DEFAULT_BASE_URL } from '../constants.js'
 import { FeedpixError } from '../errors.js'
 import { writeJson } from '../output.js'
 import { jsonEnabled, runAction } from './shared.js'
@@ -8,8 +9,8 @@ import { jsonEnabled, runAction } from './shared.js'
 export function addInitCommand(program: Command): void {
   program
     .command('init')
-    .description('Write ~/.feedpix/config.json with a Dashboard base URL')
-    .requiredOption('--base-url <url>', 'Dashboard origin, for example https://feedmob-pixel-dashboard.feedmob.com')
+    .description('Write ~/.feedpix/config.json with token environment preferences')
+    .option('--base-url <url>', 'override the fixed Dashboard base URL for local development')
     .option('--token <token>', 'store a Dashboard API token in config; prefer env vars for normal use')
     .option('--token-env-var <name>', 'store the environment variable name to read the API token from')
     .action(async (options, command) => {
@@ -17,9 +18,10 @@ export function addInitCommand(program: Command): void {
         if (options.token && options.tokenEnvVar) {
           throw new FeedpixError('validation_error', 'Use either --token or --token-env-var, not both.')
         }
-        validateBaseUrl(options.baseUrl)
+        const baseUrl = options.baseUrl ?? DEFAULT_BASE_URL
+        validateBaseUrl(baseUrl)
         const path = await writeConfig({
-          baseUrl: options.baseUrl,
+          baseUrl,
           ...(options.token ? { token: options.token } : {}),
           ...(options.tokenEnvVar ? { tokenEnvVar: options.tokenEnvVar } : {}),
         })
@@ -31,13 +33,13 @@ export function addInitCommand(program: Command): void {
         if (jsonEnabled(command)) {
           writeJson({
             path,
-            baseUrl: options.baseUrl,
+            baseUrl,
             tokenStored: Boolean(options.token),
             tokenEnvVar: options.tokenEnvVar,
           })
         } else {
           process.stdout.write(`Wrote ${path}\n`)
-          process.stdout.write(`baseUrl: ${options.baseUrl}\n`)
+          process.stdout.write(`baseUrl: ${baseUrl}\n`)
           if (options.tokenEnvVar) {
             process.stdout.write(`token: read from $${options.tokenEnvVar}\n`)
           } else if (!options.token) {

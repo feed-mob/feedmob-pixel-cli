@@ -23,7 +23,7 @@ describe('config', () => {
     const dir = await tempConfigDir()
     const state = await loadConfig({ env: {}, configDir: dir })
 
-    expect(state.baseUrl).toEqual({ value: undefined, source: 'missing' })
+    expect(state.baseUrl).toEqual({ value: 'https://feedmob-pixel-dashboard.feedmob.com/', source: 'default' })
     expect(state.token).toEqual({ value: undefined, source: 'missing' })
     expect(state.configPath).toBe(join(dir, 'config.json'))
   })

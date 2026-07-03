@@ -27,8 +27,8 @@ describe('npm package metadata', () => {
     const { stdout } = await execFileAsync('node', ['scripts/postinstall.cjs'])
 
     expect(stdout).toContain('feedpix installed')
-    expect(stdout).toContain('feedpix init --base-url')
     expect(stdout).toContain('FEEDMOB_DASHBOARD_API_TOKEN')
     expect(stdout).toContain('--token-env-var')
+    expect(stdout).toContain('feedpix --json doctor')
   })
 })

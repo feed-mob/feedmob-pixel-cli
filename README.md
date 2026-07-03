@@ -16,7 +16,6 @@ command -v feedpix
 After installation, configure a Dashboard API token before making API calls:
 
 ```bash
-feedpix init --base-url https://feedmob-pixel-dashboard.feedmob.com
 export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
 feedpix --json doctor
 ```
@@ -49,18 +48,18 @@ command -v feedpix
 
 ## Configure
 
-Production:
+The production Dashboard base URL is fixed by default:
 
 ```bash
-feedpix init --base-url https://feedmob-pixel-dashboard.feedmob.com
+https://feedmob-pixel-dashboard.feedmob.com/
 ```
+
+You only need `feedpix init` when you want to store token environment preferences or override the URL for local development.
 
 Production with a configured token environment variable name:
 
 ```bash
-feedpix init \
-  --base-url https://feedmob-pixel-dashboard.feedmob.com \
-  --token-env-var FEEDMOB_PIXEL_API_TOKEN
+feedpix init --token-env-var FEEDMOB_PIXEL_API_TOKEN
 ```
 
 Local Rails/Dashboard:
@@ -76,6 +75,7 @@ The CLI accepts a base URL from these sources, in order:
 1. `FEEDMOB_DASHBOARD_BASE_URL` or `FEEDPIX_BASE_URL`
 2. `~/.feedpix/.env`, or the file named by `FEEDPIX_ENV_FILE`
 3. `~/.feedpix/config.json`
+4. fixed default `https://feedmob-pixel-dashboard.feedmob.com/`
 
 ## Authentication
 
@@ -91,9 +91,7 @@ feedpix --json doctor
 Custom token env var configured in `config.json`:
 
 ```bash
-feedpix init \
-  --base-url https://feedmob-pixel-dashboard.feedmob.com \
-  --token-env-var FEEDMOB_PIXEL_API_TOKEN
+feedpix init --token-env-var FEEDMOB_PIXEL_API_TOKEN
 export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
 feedpix --json doctor
 ```
@@ -114,9 +112,7 @@ feedpix --json doctor
 Persistent local env file with a configured token variable name:
 
 ```bash
-feedpix init \
-  --base-url https://feedmob-pixel-dashboard.feedmob.com \
-  --token-env-var FEEDMOB_PIXEL_API_TOKEN
+feedpix init --token-env-var FEEDMOB_PIXEL_API_TOKEN
 printf '%s\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' >> ~/.feedpix/.env
 feedpix --json doctor
 ```

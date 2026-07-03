@@ -1,9 +1,10 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { DEFAULT_BASE_URL } from './constants.js'
 import { FeedpixError } from './errors.js'
 
-export type ValueSource = 'flag' | 'env' | 'env_file' | 'config' | 'missing'
+export type ValueSource = 'flag' | 'env' | 'env_file' | 'config' | 'default' | 'missing'
 
 export interface SourceValue {
   value?: string
@@ -69,6 +70,7 @@ export async function loadConfig(options: LoadConfigOptions = {}): Promise<Confi
       envValue(env, 'FEEDMOB_DASHBOARD_BASE_URL', 'FEEDPIX_BASE_URL'),
       envFileValue(localEnv, 'FEEDMOB_DASHBOARD_BASE_URL', 'FEEDPIX_BASE_URL'),
       clean(rawConfig.baseUrl),
+      DEFAULT_BASE_URL,
     ),
     token: sourceValue(
       clean(options.flagToken),
@@ -162,11 +164,13 @@ function sourceValue(
   env: SourceValue,
   envFile: SourceValue,
   configValue: string | undefined,
+  defaultValue?: string,
 ): SourceValue {
   if (flagValue) return { value: flagValue, source: 'flag' }
   if (env.value) return env
   if (envFile.value) return envFile
   if (configValue) return { value: configValue, source: 'config' }
+  if (defaultValue) return { value: defaultValue, source: 'default' }
   return { value: undefined, source: 'missing' }
 }
 

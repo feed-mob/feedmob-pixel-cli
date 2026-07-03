@@ -91,8 +91,6 @@ describe('cli', () => {
         'feedpix',
         '--json',
         'init',
-        '--base-url',
-        'http://localhost:3000',
         '--token-env-var',
         'CUSTOM_FEEDPIX_TOKEN',
       ])
@@ -112,7 +110,7 @@ describe('cli', () => {
       configDir: dir,
     })
     expect(state.rawConfig).toEqual({
-      baseUrl: 'http://localhost:3000',
+      baseUrl: 'https://feedmob-pixel-dashboard.feedmob.com/',
       tokenEnvVar: 'CUSTOM_FEEDPIX_TOKEN',
     })
     expect(state.token).toEqual({ value: 'fmpat_custom_env', source: 'env' })
