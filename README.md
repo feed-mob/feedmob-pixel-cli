@@ -13,6 +13,14 @@ npm install -g .
 command -v feedpix
 ```
 
+After installation, configure a Dashboard API token before making API calls:
+
+```bash
+feedpix init --base-url https://feedmob-pixel-dashboard.feedmob.com
+export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
+feedpix --json doctor
+```
+
 Install from a packed tarball:
 
 ```bash
