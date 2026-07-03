@@ -6,11 +6,12 @@ It uses the Dashboard Bearer-token API, writes stable JSON with `--json`, and do
 
 ## Install
 
-Install with npm from this repo:
+Install the published npm package:
 
 ```bash
-npm install -g .
+npm install -g @feedmob/feedmob-pixel-cli
 command -v feedpix
+feedpix --version
 ```
 
 After installation, configure a Dashboard API token before making API calls:
@@ -20,18 +21,20 @@ export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
 feedpix --json doctor
 ```
 
+The npm package is `@feedmob/feedmob-pixel-cli`; the installed command is `feedpix`.
+
+Install from this repo for local testing:
+
+```bash
+npm install -g .
+command -v feedpix
+```
+
 Install from a packed tarball:
 
 ```bash
 npm pack
-npm install -g ./feedmob-feedmob-pixel-cli-0.1.0.tgz
-command -v feedpix
-```
-
-After publishing to an npm registry:
-
-```bash
-npm install -g @feedmob/feedmob-pixel-cli
+npm install -g ./feedmob-feedmob-pixel-cli-*.tgz
 command -v feedpix
 ```
 
@@ -40,11 +43,34 @@ For local development:
 ```bash
 pnpm install
 pnpm build
+pnpm test
 make install-local
 command -v feedpix
 ```
 
 `make install-local` installs a small wrapper at `~/.local/bin/feedpix`. npm global install links the package-managed `feedpix` binary. Ensure the relevant bin directory is on your `PATH`.
+
+## Development
+
+Install dependencies, build the TypeScript output, and run tests:
+
+```bash
+pnpm install
+pnpm build
+pnpm test
+```
+
+`pnpm build` and `pnpm test` generate `src/generated/version.ts` from `package.json.version` before compiling or running tests. Do not edit generated version files by hand.
+
+## Release
+
+The package is published to npm as `@feedmob/feedmob-pixel-cli`.
+
+1. Bump `package.json.version`.
+2. Run `pnpm test` and `npm pack --dry-run`.
+3. Merge the release change to `main`.
+
+The `Publish to npm` GitHub Actions workflow runs on pushes to `main`, checks whether the current `name@version` already exists on npm, and publishes only unpublished versions. npm Trusted Publisher should be configured for repository `feed-mob/feedmob-pixel-cli` and workflow filename `publish.yml`.
 
 ## Configure
 
