@@ -22,7 +22,7 @@ describe('npm package metadata', () => {
 
     expect(packageJson.name).toBe('@feedmob/feedmob-pixel-cli')
     expect(packageJson.private).not.toBe(true)
-    expect(packageJson.bin).toEqual({ feedpix: './dist/cli.js' })
+    expect(packageJson.bin).toEqual({ feedpix: 'dist/cli.js' })
     expect(packageJson.publishConfig).toEqual({
       access: 'public',
       registry: 'https://registry.npmjs.org/',
@@ -62,9 +62,14 @@ describe('npm package metadata', () => {
   test('postinstall message prompts users to configure an API token', async () => {
     const { stdout } = await execFileAsync('node', ['scripts/postinstall.cjs'])
 
-    expect(stdout).toContain('feedpix installed')
+    expect(stdout).toContain('feedpix installed - FeedMob Pixel Dashboard CLI')
+    expect(stdout).toContain('Read-only Dashboard API queries')
     expect(stdout).toContain('FEEDMOB_DASHBOARD_API_TOKEN')
     expect(stdout).toContain('--token-env-var')
+    expect(stdout).toContain('feedpix --version')
+    expect(stdout).toContain('feedpix --help')
     expect(stdout).toContain('feedpix --json doctor')
+    expect(stdout).toContain('feedpix --json advertisers list')
+    expect(stdout).toContain('https://github.com/feed-mob/feedmob-pixel-cli#readme')
   })
 })
