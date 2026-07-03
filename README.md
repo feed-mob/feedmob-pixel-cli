@@ -47,6 +47,14 @@ Production:
 feedpix init --base-url https://feedmob-pixel-dashboard.feedmob.com
 ```
 
+Production with a configured token environment variable name:
+
+```bash
+feedpix init \
+  --base-url https://feedmob-pixel-dashboard.feedmob.com \
+  --token-env-var FEEDMOB_PIXEL_API_TOKEN
+```
+
 Local Rails/Dashboard:
 
 ```bash
@@ -72,6 +80,16 @@ export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
 feedpix --json doctor
 ```
 
+Custom token env var configured in `config.json`:
+
+```bash
+feedpix init \
+  --base-url https://feedmob-pixel-dashboard.feedmob.com \
+  --token-env-var FEEDMOB_PIXEL_API_TOKEN
+export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
+feedpix --json doctor
+```
+
 Persistent local env file:
 
 ```bash
@@ -85,6 +103,16 @@ chmod 600 ~/.feedpix/.env
 feedpix --json doctor
 ```
 
+Persistent local env file with a configured token variable name:
+
+```bash
+feedpix init \
+  --base-url https://feedmob-pixel-dashboard.feedmob.com \
+  --token-env-var FEEDMOB_PIXEL_API_TOKEN
+printf '%s\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' >> ~/.feedpix/.env
+feedpix --json doctor
+```
+
 Custom env file:
 
 ```bash
@@ -94,8 +122,10 @@ FEEDPIX_ENV_FILE=/path/to/feedpix.env feedpix --json doctor
 Token sources, in order:
 
 1. `FEEDMOB_DASHBOARD_API_TOKEN` or `FEEDPIX_TOKEN`
-2. `~/.feedpix/.env`, or the file named by `FEEDPIX_ENV_FILE`
-3. `~/.feedpix/config.json` only if explicitly written with `feedpix init --token ...`
+2. the custom env var configured with `feedpix init --token-env-var NAME`
+3. `FEEDMOB_DASHBOARD_API_TOKEN` or `FEEDPIX_TOKEN` from `~/.feedpix/.env`, or the file named by `FEEDPIX_ENV_FILE`
+4. the custom env var from that local env file
+5. `~/.feedpix/config.json` only if explicitly written with `feedpix init --token ...`
 
 Avoid storing tokens in repo files, shell history, logs, screenshots, or generated fixtures.
 

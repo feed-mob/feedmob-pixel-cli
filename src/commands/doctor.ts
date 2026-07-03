@@ -23,6 +23,7 @@ interface DoctorPayload {
       present: boolean
       source: string
     }
+    tokenEnvVar?: string
   }
   setup: {
     ok: boolean
@@ -77,6 +78,7 @@ export function addDoctorCommand(program: Command): void {
               present: Boolean(config.token.value),
               source: config.token.source,
             },
+            ...(config.rawConfig.tokenEnvVar ? { tokenEnvVar: config.rawConfig.tokenEnvVar } : {}),
           },
           setup: {
             ok: missing.length === 0 && metadata.ok,
@@ -126,6 +128,9 @@ function printDoctor(payload: DoctorPayload): void {
     `baseUrl: ${payload.config.baseUrl.configured ? payload.config.baseUrl.value : 'missing'} (${payload.config.baseUrl.source})\n`,
   )
   process.stdout.write(`token: ${payload.config.token.present ? 'present' : 'missing'} (${payload.config.token.source})\n`)
+  if (payload.config.tokenEnvVar) {
+    process.stdout.write(`tokenEnvVar: ${payload.config.tokenEnvVar}\n`)
+  }
   process.stdout.write(
     `metadata: ${payload.checks.metadata.ok ? 'ok' : payload.checks.metadata.reason ?? payload.checks.metadata.error?.message ?? 'failed'}\n`,
   )
