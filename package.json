@@ -1,10 +1,10 @@
 {
   "name": "@feedmob/feedmob-pixel-cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "FeedMob Pixel Dashboard data query CLI",
   "type": "module",
   "bin": {
-    "feedpix": "./dist/cli.js"
+    "feedpix": "dist/cli.js"
   },
   "repository": {
     "type": "git",

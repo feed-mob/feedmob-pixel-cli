@@ -1,20 +1,36 @@
 #!/usr/bin/env node
 
 const message = `
-feedpix installed.
+feedpix installed - FeedMob Pixel Dashboard CLI.
 
-Next steps:
-  1. Configure a Dashboard API token:
+What it does:
+  - Read-only Dashboard API queries from any working directory.
+  - Discover advertisers, TV platforms, categories, summaries, records, and CSV exports.
+  - Write stable JSON with --json and avoid printing API tokens.
+
+Quick start:
+  1. Confirm the command is available:
+     feedpix --version
+     feedpix --help
+
+  2. Configure a Dashboard API token:
      export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
 
-     The production Dashboard URL is already fixed:
+     The production Dashboard URL is already configured:
      https://feedmob-pixel-dashboard.feedmob.com/
 
-     or store only the token environment variable name:
+     Or store only the token environment variable name:
      feedpix init --token-env-var FEEDMOB_PIXEL_API_TOKEN
 
-  2. Check setup:
+  3. Check setup:
      feedpix --json doctor
+
+  4. Start discovery:
+     feedpix --json advertisers list
+     feedpix --json tv-platforms list --advertiser chime
+
+Docs:
+  https://github.com/feed-mob/feedmob-pixel-cli#readme
 
 Never commit, paste, or log real API tokens.
 `

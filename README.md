@@ -23,6 +23,8 @@ feedpix --json doctor
 
 The npm package is `@feedmob/feedmob-pixel-cli`; the installed command is `feedpix`.
 
+Some npm versions hide successful install script output and only print `added packages`. If that happens, start with `feedpix --help` and `feedpix --json doctor`.
+
 Install from this repo for local testing:
 
 ```bash
