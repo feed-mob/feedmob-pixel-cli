@@ -66,6 +66,8 @@ describe('npm package metadata', () => {
     expect(stdout).toContain('Read-only Dashboard API queries')
     expect(stdout).toContain('FEEDMOB_DASHBOARD_API_TOKEN')
     expect(stdout).toContain('--token-env-var')
+    expect(stdout).toContain('~/.fpc/config.json')
+    expect(stdout).toContain('~/.fpc/.env')
     expect(stdout).toContain('fpc --version')
     expect(stdout).toContain('fpc --help')
     expect(stdout).toContain('fpc --json doctor')

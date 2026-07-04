@@ -54,10 +54,10 @@ describe('cli', () => {
 
   test('init accepts its local --base-url option and does not store a token by default', async () => {
     const dir = await tempConfigDir()
-    const previousConfigDir = process.env.FEEDPIX_CONFIG_DIR
+    const previousConfigDir = process.env.FPC_CONFIG_DIR
     const stdout = process.stdout.write
 
-    process.env.FEEDPIX_CONFIG_DIR = dir
+    process.env.FPC_CONFIG_DIR = dir
     process.stdout.write = (() => true) as typeof process.stdout.write
 
     try {
@@ -67,9 +67,9 @@ describe('cli', () => {
     } finally {
       process.stdout.write = stdout
       if (previousConfigDir === undefined) {
-        delete process.env.FEEDPIX_CONFIG_DIR
+        delete process.env.FPC_CONFIG_DIR
       } else {
-        process.env.FEEDPIX_CONFIG_DIR = previousConfigDir
+        process.env.FPC_CONFIG_DIR = previousConfigDir
       }
     }
 
@@ -80,10 +80,10 @@ describe('cli', () => {
 
   test('init can store a token environment variable name without storing a token', async () => {
     const dir = await tempConfigDir()
-    const previousConfigDir = process.env.FEEDPIX_CONFIG_DIR
+    const previousConfigDir = process.env.FPC_CONFIG_DIR
     const stdout = process.stdout.write
 
-    process.env.FEEDPIX_CONFIG_DIR = dir
+    process.env.FPC_CONFIG_DIR = dir
     process.stdout.write = (() => true) as typeof process.stdout.write
 
     try {
@@ -95,26 +95,26 @@ describe('cli', () => {
         '--json',
         'init',
         '--token-env-var',
-        'CUSTOM_FEEDPIX_TOKEN',
+        'CUSTOM_FPC_TOKEN',
       ])
     } finally {
       process.stdout.write = stdout
       if (previousConfigDir === undefined) {
-        delete process.env.FEEDPIX_CONFIG_DIR
+        delete process.env.FPC_CONFIG_DIR
       } else {
-        process.env.FEEDPIX_CONFIG_DIR = previousConfigDir
+        process.env.FPC_CONFIG_DIR = previousConfigDir
       }
     }
 
     const state = await loadConfig({
       env: {
-        CUSTOM_FEEDPIX_TOKEN: 'fmpat_custom_env',
+        CUSTOM_FPC_TOKEN: 'fmpat_custom_env',
       },
       configDir: dir,
     })
     expect(state.rawConfig).toEqual({
       baseUrl: 'https://feedmob-pixel-dashboard.feedmob.com/',
-      tokenEnvVar: 'CUSTOM_FEEDPIX_TOKEN',
+      tokenEnvVar: 'CUSTOM_FPC_TOKEN',
     })
     expect(state.token).toEqual({ value: 'fmpat_custom_env', source: 'env' })
   })

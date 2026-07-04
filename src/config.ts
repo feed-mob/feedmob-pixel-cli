@@ -38,7 +38,7 @@ export interface WriteConfigOptions {
 }
 
 export function defaultConfigDir(env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env): string {
-  return env.FEEDPIX_CONFIG_DIR || join(homedir(), '.feedpix')
+  return clean(env.FPC_CONFIG_DIR) || clean(env.FEEDPIX_CONFIG_DIR) || join(homedir(), '.fpc')
 }
 
 export function configPath(configDir = defaultConfigDir()): string {
@@ -49,7 +49,7 @@ export function envPath(
   env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
   configDir = defaultConfigDir(env),
 ): string {
-  return env.FEEDPIX_ENV_FILE || join(configDir, '.env')
+  return clean(env.FPC_ENV_FILE) || clean(env.FEEDPIX_ENV_FILE) || join(configDir, '.env')
 }
 
 export async function loadConfig(options: LoadConfigOptions = {}): Promise<ConfigState> {
@@ -67,8 +67,8 @@ export async function loadConfig(options: LoadConfigOptions = {}): Promise<Confi
     rawConfig,
     baseUrl: sourceValue(
       clean(options.flagBaseUrl),
-      envValue(env, 'FEEDMOB_DASHBOARD_BASE_URL', 'FEEDPIX_BASE_URL'),
-      envFileValue(localEnv, 'FEEDMOB_DASHBOARD_BASE_URL', 'FEEDPIX_BASE_URL'),
+      envValue(env, 'FEEDMOB_DASHBOARD_BASE_URL', 'FPC_BASE_URL', 'FEEDPIX_BASE_URL'),
+      envFileValue(localEnv, 'FEEDMOB_DASHBOARD_BASE_URL', 'FPC_BASE_URL', 'FEEDPIX_BASE_URL'),
       clean(rawConfig.baseUrl),
       DEFAULT_BASE_URL,
     ),
@@ -217,7 +217,7 @@ function requiredEnvVarName(value: string | undefined, name: string): string {
 }
 
 function tokenEnvNames(config: FeedpixConfigFile): string[] {
-  return ['FEEDMOB_DASHBOARD_API_TOKEN', 'FEEDPIX_TOKEN', clean(config.tokenEnvVar)].filter(
+  return ['FEEDMOB_DASHBOARD_API_TOKEN', 'FPC_TOKEN', 'FEEDPIX_TOKEN', clean(config.tokenEnvVar)].filter(
     (name): name is string => Boolean(name),
   )
 }

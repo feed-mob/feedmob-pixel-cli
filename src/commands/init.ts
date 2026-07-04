@@ -9,7 +9,7 @@ import { jsonEnabled, runAction } from './shared.js'
 export function addInitCommand(program: Command): void {
   program
     .command('init')
-    .description('Write ~/.feedpix/config.json with token environment preferences')
+    .description('Write ~/.fpc/config.json with token environment preferences')
     .option('--base-url <url>', 'override the fixed Dashboard base URL for local development')
     .option('--token <token>', 'store a Dashboard API token in config; prefer env vars for normal use')
     .option('--token-env-var <name>', 'store the environment variable name to read the API token from')

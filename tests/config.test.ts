@@ -1,8 +1,8 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
+import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, test } from 'vitest'
-import { loadConfig, writeConfig } from '../src/config.js'
+import { defaultConfigDir, envPath, loadConfig, writeConfig } from '../src/config.js'
 
 const tempDirs: string[] = []
 
@@ -19,6 +19,22 @@ afterEach(async () => {
 })
 
 describe('config', () => {
+  test('uses ~/.fpc as the default config directory', () => {
+    expect(defaultConfigDir({})).toBe(join(homedir(), '.fpc'))
+    expect(envPath({}, '/tmp/example-fpc-config')).toBe(join('/tmp/example-fpc-config', '.env'))
+  })
+
+  test('supports FPC_CONFIG_DIR and keeps FEEDPIX_CONFIG_DIR as a fallback', () => {
+    expect(defaultConfigDir({ FPC_CONFIG_DIR: '/tmp/fpc-config' })).toBe('/tmp/fpc-config')
+    expect(defaultConfigDir({ FEEDPIX_CONFIG_DIR: '/tmp/feedpix-config' })).toBe('/tmp/feedpix-config')
+    expect(
+      defaultConfigDir({
+        FPC_CONFIG_DIR: '/tmp/fpc-config',
+        FEEDPIX_CONFIG_DIR: '/tmp/feedpix-config',
+      }),
+    ).toBe('/tmp/fpc-config')
+  })
+
   test('reports missing baseUrl and token without throwing', async () => {
     const dir = await tempConfigDir()
     const state = await loadConfig({ env: {}, configDir: dir })
@@ -106,7 +122,22 @@ describe('config', () => {
     expect(fromProcessEnv.token).toEqual({ value: 'fmpat_env', source: 'env' })
   })
 
-  test('supports FEEDPIX_ENV_FILE for a custom local env file path', async () => {
+  test('supports FPC_ENV_FILE for a custom local env file path', async () => {
+    const dir = await tempConfigDir()
+    const customEnvFile = join(dir, 'fpc.local.env')
+    await writeFile(customEnvFile, 'FEEDMOB_DASHBOARD_API_TOKEN=fmpat_custom_env_file\n')
+
+    const state = await loadConfig({
+      env: {
+        FPC_ENV_FILE: customEnvFile,
+      },
+      configDir: dir,
+    })
+
+    expect(state.token).toEqual({ value: 'fmpat_custom_env_file', source: 'env_file' })
+  })
+
+  test('keeps FEEDPIX_ENV_FILE as a custom local env file fallback', async () => {
     const dir = await tempConfigDir()
     const customEnvFile = join(dir, 'fpc.local.env')
     await writeFile(customEnvFile, 'FEEDMOB_DASHBOARD_API_TOKEN=fmpat_custom_env_file\n')
@@ -121,16 +152,31 @@ describe('config', () => {
     expect(state.token).toEqual({ value: 'fmpat_custom_env_file', source: 'env_file' })
   })
 
+  test('supports FPC base URL and token aliases', async () => {
+    const dir = await tempConfigDir()
+
+    const state = await loadConfig({
+      env: {
+        FPC_BASE_URL: 'https://from-fpc-env.example.com',
+        FPC_TOKEN: 'fmpat_fpc_env',
+      },
+      configDir: dir,
+    })
+
+    expect(state.baseUrl).toEqual({ value: 'https://from-fpc-env.example.com', source: 'env' })
+    expect(state.token).toEqual({ value: 'fmpat_fpc_env', source: 'env' })
+  })
+
   test('loads token from a configured environment variable name', async () => {
     const dir = await tempConfigDir()
     await writeFile(
       join(dir, 'config.json'),
-      JSON.stringify({ baseUrl: 'https://dashboard.example.com', tokenEnvVar: 'CUSTOM_FEEDPIX_TOKEN' }),
+      JSON.stringify({ baseUrl: 'https://dashboard.example.com', tokenEnvVar: 'CUSTOM_FPC_TOKEN' }),
     )
 
     const state = await loadConfig({
       env: {
-        CUSTOM_FEEDPIX_TOKEN: 'fmpat_custom_env',
+        CUSTOM_FPC_TOKEN: 'fmpat_custom_env',
       },
       configDir: dir,
     })
@@ -142,9 +188,9 @@ describe('config', () => {
     const dir = await tempConfigDir()
     await writeFile(
       join(dir, 'config.json'),
-      JSON.stringify({ baseUrl: 'https://dashboard.example.com', tokenEnvVar: 'CUSTOM_FEEDPIX_TOKEN' }),
+      JSON.stringify({ baseUrl: 'https://dashboard.example.com', tokenEnvVar: 'CUSTOM_FPC_TOKEN' }),
     )
-    await writeFile(join(dir, '.env'), 'CUSTOM_FEEDPIX_TOKEN=fmpat_custom_env_file\n')
+    await writeFile(join(dir, '.env'), 'CUSTOM_FPC_TOKEN=fmpat_custom_env_file\n')
 
     const state = await loadConfig({ env: {}, configDir: dir })
 
@@ -166,20 +212,20 @@ describe('config', () => {
   test('writeConfig can store a token environment variable name without storing a token', async () => {
     const dir = await tempConfigDir()
     await writeConfig(
-      { baseUrl: 'https://dashboard.example.com', tokenEnvVar: 'CUSTOM_FEEDPIX_TOKEN' },
+      { baseUrl: 'https://dashboard.example.com', tokenEnvVar: 'CUSTOM_FPC_TOKEN' },
       { configDir: dir },
     )
 
     const state = await loadConfig({
       env: {
-        CUSTOM_FEEDPIX_TOKEN: 'fmpat_custom_env',
+        CUSTOM_FPC_TOKEN: 'fmpat_custom_env',
       },
       configDir: dir,
     })
 
     expect(state.rawConfig).toEqual({
       baseUrl: 'https://dashboard.example.com',
-      tokenEnvVar: 'CUSTOM_FEEDPIX_TOKEN',
+      tokenEnvVar: 'CUSTOM_FPC_TOKEN',
     })
     expect(state.token).toEqual({ value: 'fmpat_custom_env', source: 'env' })
   })

@@ -22,6 +22,10 @@ Quick start:
      Or store only the token environment variable name:
      fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
 
+     Local config defaults to:
+     ~/.fpc/config.json
+     ~/.fpc/.env
+
   3. Check setup:
      fpc --json doctor
 

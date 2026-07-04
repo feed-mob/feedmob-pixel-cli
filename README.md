@@ -96,14 +96,16 @@ Local Rails/Dashboard:
 fpc init --base-url http://localhost:3000
 ```
 
-Config is stored at `~/.feedpix/config.json`. Local environment variables may be stored in `~/.feedpix/.env`.
+Config is stored at `~/.fpc/config.json`. Local environment variables may be stored in `~/.fpc/.env`.
 
 The CLI accepts a base URL from these sources, in order:
 
-1. `FEEDMOB_DASHBOARD_BASE_URL` or `FEEDPIX_BASE_URL`
-2. `~/.feedpix/.env`, or the file named by `FEEDPIX_ENV_FILE`
-3. `~/.feedpix/config.json`
+1. `FEEDMOB_DASHBOARD_BASE_URL`, `FPC_BASE_URL`, or legacy `FEEDPIX_BASE_URL`
+2. `~/.fpc/.env`, or the file named by `FPC_ENV_FILE`
+3. `~/.fpc/config.json`
 4. fixed default `https://feedmob-pixel-dashboard.feedmob.com/`
+
+Legacy `FEEDPIX_CONFIG_DIR` and `FEEDPIX_ENV_FILE` overrides are still supported as fallbacks.
 
 ## Authentication
 
@@ -127,13 +129,13 @@ fpc --json doctor
 Persistent local env file:
 
 ```bash
-mkdir -p ~/.feedpix
-chmod 700 ~/.feedpix
+mkdir -p ~/.fpc
+chmod 700 ~/.fpc
 printf '%s\n' \
   'FEEDMOB_DASHBOARD_BASE_URL=https://feedmob-pixel-dashboard.feedmob.com' \
   'FEEDMOB_DASHBOARD_API_TOKEN=fmpat_xxx' \
-  > ~/.feedpix/.env
-chmod 600 ~/.feedpix/.env
+  > ~/.fpc/.env
+chmod 600 ~/.fpc/.env
 fpc --json doctor
 ```
 
@@ -141,23 +143,23 @@ Persistent local env file with a configured token variable name:
 
 ```bash
 fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
-printf '%s\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' >> ~/.feedpix/.env
+printf '%s\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' >> ~/.fpc/.env
 fpc --json doctor
 ```
 
 Custom env file:
 
 ```bash
-FEEDPIX_ENV_FILE=/path/to/fpc.env fpc --json doctor
+FPC_ENV_FILE=/path/to/fpc.env fpc --json doctor
 ```
 
 Token sources, in order:
 
-1. `FEEDMOB_DASHBOARD_API_TOKEN` or `FEEDPIX_TOKEN`
+1. `FEEDMOB_DASHBOARD_API_TOKEN`, `FPC_TOKEN`, or legacy `FEEDPIX_TOKEN`
 2. the custom env var configured with `fpc init --token-env-var NAME`
-3. `FEEDMOB_DASHBOARD_API_TOKEN` or `FEEDPIX_TOKEN` from `~/.feedpix/.env`, or the file named by `FEEDPIX_ENV_FILE`
+3. `FEEDMOB_DASHBOARD_API_TOKEN`, `FPC_TOKEN`, or legacy `FEEDPIX_TOKEN` from `~/.fpc/.env`, or the file named by `FPC_ENV_FILE`
 4. the custom env var from that local env file
-5. `~/.feedpix/config.json` only if explicitly written with `fpc init --token ...`
+5. `~/.fpc/config.json` only if explicitly written with `fpc init --token ...`
 
 Avoid storing tokens in repo files, shell history, logs, screenshots, or generated fixtures.
 
