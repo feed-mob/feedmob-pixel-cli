@@ -4,7 +4,17 @@
 
 ## Authentication
 
-Preferred auth:
+Preferred persistent local auth:
+
+```bash
+mkdir -p ~/.fpc
+chmod 700 ~/.fpc
+printf '%s\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' > ~/.fpc/.env
+chmod 600 ~/.fpc/.env
+fpc doctor
+```
+
+One-off shell auth:
 
 ```bash
 export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'

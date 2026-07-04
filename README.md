@@ -26,7 +26,10 @@ fpc doctor
 Configure a Dashboard API token:
 
 ```bash
-export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
+mkdir -p ~/.fpc
+chmod 700 ~/.fpc
+printf '%s\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' > ~/.fpc/.env
+chmod 600 ~/.fpc/.env
 fpc doctor
 ```
 
@@ -84,13 +87,20 @@ Token sources, in order:
 2. the same token env vars from `~/.fpc/.env`, or the file named by `FPC_ENV_FILE`
 3. `~/.fpc/config.json` only if explicitly written with `fpc init --token ...`
 
-Prefer shell env or a local env file over storing tokens in config:
+Prefer a local env file or shell env over storing tokens in config:
 
 ```bash
 mkdir -p ~/.fpc
 chmod 700 ~/.fpc
 printf '%s\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' > ~/.fpc/.env
 chmod 600 ~/.fpc/.env
+fpc doctor
+```
+
+For a one-off shell session:
+
+```bash
+export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
 fpc doctor
 ```
 
