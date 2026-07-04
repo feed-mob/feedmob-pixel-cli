@@ -7,7 +7,7 @@
 `fpc` checks the latest npm version on each run. If the installed version is behind, it prints a notice to stderr:
 
 ```text
-fpc update available: 0.1.5 -> 0.1.6
+fpc update available: 0.1.6 -> 0.2.0
 Run: npm install -g @feedmob/feedmob-pixel-cli@latest
 ```
 
