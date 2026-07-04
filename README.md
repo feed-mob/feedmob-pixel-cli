@@ -1,12 +1,10 @@
 # feedmob-pixel-cli
 
-`fpc` is a read-only TypeScript/Node CLI for querying the FeedMob Pixel Dashboard API from any working directory.
+`fpc` is a read-only Node CLI for querying the FeedMob Pixel Dashboard API from any working directory.
 
-It uses the Dashboard Bearer-token API, writes stable JSON to stdout, and downloads category record exports as CSV.
+It uses Dashboard API tokens, writes JSON to stdout by default, and can export category records as CSV.
 
 ## Install
-
-Install the published npm package:
 
 ```bash
 npm install -g @feedmob/feedmob-pixel-cli
@@ -14,197 +12,47 @@ command -v fpc
 fpc --version
 ```
 
-After installation, configure a Dashboard API token before making API calls:
-
-```bash
-export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
-fpc doctor
-```
-
 The npm package is `@feedmob/feedmob-pixel-cli`; the installed command is `fpc`.
 
-Some npm versions hide successful install script output and only print `added packages`. If that happens, start with `fpc --help` and `fpc doctor`.
-
-Install from this repo for local testing:
+Some npm versions hide successful install script output and only print `added packages`. If that happens, start with:
 
 ```bash
-npm install -g .
-command -v fpc
+fpc --help
+fpc doctor
 ```
 
-Install from a packed tarball:
+## Quick Start
 
-```bash
-npm pack
-npm install -g ./feedmob-feedmob-pixel-cli-*.tgz
-command -v fpc
-```
-
-For local development:
-
-```bash
-pnpm install
-pnpm build
-pnpm test
-make install-local
-command -v fpc
-```
-
-`make install-local` installs a small wrapper at `~/.local/bin/fpc`. npm global install links the package-managed `fpc` binary. Ensure the relevant bin directory is on your `PATH`.
-
-## Development
-
-Install dependencies, build the TypeScript output, and run tests:
-
-```bash
-pnpm install
-pnpm build
-pnpm test
-```
-
-`pnpm build` and `pnpm test` generate `src/generated/version.ts` from `package.json.version` before compiling or running tests. Do not edit generated version files by hand.
-
-## Release
-
-The package is published to npm as `@feedmob/feedmob-pixel-cli`.
-
-1. Bump `package.json.version`.
-2. Run `pnpm test` and `npm pack --dry-run`.
-3. Merge the release change to `main`.
-
-The `Publish to npm` GitHub Actions workflow runs on pushes to `main`, checks whether the current `name@version` already exists on npm, and publishes only unpublished versions. npm Trusted Publisher should be configured for repository `feed-mob/feedmob-pixel-cli` and workflow filename `publish.yml`.
-
-## Configure
-
-The production Dashboard base URL is fixed in code:
-
-```bash
-https://feedmob-pixel-dashboard.feedmob.com/
-```
-
-It is not read from `config.json`, shell env, or the local `.env` file. You only need `fpc init` when you want to store token environment preferences.
-
-Production with a configured token environment variable name:
-
-```bash
-fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
-```
-
-Config is stored at `~/.fpc/config.json`. Local environment variables may be stored in `~/.fpc/.env`.
-
-Legacy `FEEDPIX_CONFIG_DIR` and `FEEDPIX_ENV_FILE` overrides are still supported as fallbacks.
-
-## Authentication
-
-The CLI authenticates only with a Dashboard API Token. It does not perform OAuth. If you need a new token, use the Dashboard UI/API Settings page to generate one, then place it in your local environment.
-
-Preferred auth:
+Configure a Dashboard API token:
 
 ```bash
 export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
 fpc doctor
 ```
 
-Custom token env var configured in `config.json`:
-
-```bash
-fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
-export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
-fpc doctor
-```
-
-Persistent local env file:
-
-```bash
-mkdir -p ~/.fpc
-chmod 700 ~/.fpc
-printf '%s\n' \
-  'FEEDMOB_DASHBOARD_API_TOKEN=fmpat_xxx' \
-  > ~/.fpc/.env
-chmod 600 ~/.fpc/.env
-fpc doctor
-```
-
-Persistent local env file with a configured token variable name:
-
-```bash
-fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
-printf '%s\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' >> ~/.fpc/.env
-fpc doctor
-```
-
-Custom env file:
-
-```bash
-FPC_ENV_FILE=/path/to/fpc.env fpc doctor
-```
-
-Token sources, in order:
-
-1. `FEEDMOB_DASHBOARD_API_TOKEN`, `FPC_TOKEN`, or legacy `FEEDPIX_TOKEN`
-2. the custom env var configured with `fpc init --token-env-var NAME`
-3. `FEEDMOB_DASHBOARD_API_TOKEN`, `FPC_TOKEN`, or legacy `FEEDPIX_TOKEN` from `~/.fpc/.env`, or the file named by `FPC_ENV_FILE`
-4. the custom env var from that local env file
-5. `~/.fpc/config.json` only if explicitly written with `fpc init --token ...`
-
-Avoid storing tokens in repo files, shell history, logs, screenshots, or generated fixtures.
-
-## Doctor
-
-```bash
-fpc doctor
-```
-
-When setup is missing, `doctor` exits successfully and returns machine-readable setup status:
-
-```json
-{
-  "setup": {
-    "ok": false,
-    "missing": ["token"]
-  }
-}
-```
-
-## Metadata Discovery
-
-Start every new workflow by discovering valid values. Do not invent advertiser, event type, TV platform, or category values.
+Discover valid query values before requesting data:
 
 ```bash
 fpc advertisers list
-```
-
-```bash
 fpc tv-platforms list --advertiser chime
-```
-
-```bash
 fpc categories list \
   --advertiser chime \
   --event-type registration \
   --tv lg-tv \
-  --registration-date-mode auto \
   --impression-start 2026-06-01 \
   --impression-end 2026-06-30
 ```
 
-Use `category.value` or `category.slug` from `categories list` for records and exports. Only drill into categories where `canViewDetails` is `true`.
-
-## Summary
+Then query summary or records with a discovered category value:
 
 ```bash
 fpc summary get \
   --advertiser chime \
   --event-type registration \
   --tv lg-tv \
-  --registration-date-mode auto \
   --impression-start 2026-06-01 \
   --impression-end 2026-06-30
 ```
-
-## Records
-
-List one page:
 
 ```bash
 fpc records list direct-lg-ctv \
@@ -215,139 +63,52 @@ fpc records list direct-lg-ctv \
   --per-page 100
 ```
 
-Fetch multiple pages:
+## Configuration
+
+The production Dashboard URL is fixed in code:
 
 ```bash
-fpc records list direct-lg-ctv \
-  --advertiser chime \
-  --event-type registration \
-  --tv lg-tv \
-  --all-pages \
-  --max-pages 5
+https://feedmob-pixel-dashboard.feedmob.com/
 ```
 
-`--per-page` defaults to `100` and is capped at `500`.
+It is not read from `config.json`, shell env, or the local `.env` file.
 
-## CSV Export
+Local config defaults to:
 
-CSV export treats the response as text, not JSON. `--out` is required.
+- `~/.fpc/config.json`
+- `~/.fpc/.env`
+
+Token sources, in order:
+
+1. `FEEDMOB_DASHBOARD_API_TOKEN`, `FPC_TOKEN`, or legacy `FEEDPIX_TOKEN`
+2. the custom env var configured with `fpc init --token-env-var NAME`
+3. the same token env vars from `~/.fpc/.env`, or the file named by `FPC_ENV_FILE`
+4. `~/.fpc/config.json` only if explicitly written with `fpc init --token ...`
+
+Prefer shell env or a local env file over storing tokens in config:
 
 ```bash
-fpc records export direct-lg-ctv \
-  --advertiser chime \
-  --event-type registration \
-  --tv lg-tv \
-  --impression-start 2026-06-01 \
-  --impression-end 2026-06-30 \
-  --out ./direct-lg-ctv.csv
+mkdir -p ~/.fpc
+chmod 700 ~/.fpc
+printf '%s\n' 'FEEDMOB_DASHBOARD_API_TOKEN=fmpat_xxx' > ~/.fpc/.env
+chmod 600 ~/.fpc/.env
+fpc doctor
 ```
 
-JSON mode returns file metadata:
+Avoid storing tokens in repo files, shell history, logs, screenshots, or generated fixtures.
 
-```bash
-fpc records export direct-lg-ctv \
-  --advertiser chime \
-  --event-type registration \
-  --tv lg-tv \
-  --impression-start 2026-06-01 \
-  --impression-end 2026-06-30 \
-  --out ./direct-lg-ctv.csv
-```
+## More Docs
 
-```json
-{
-  "path": "/absolute/path/direct-lg-ctv.csv",
-  "bytes": 123,
-  "contentType": "text/csv"
-}
-```
+- [Usage reference](docs/usage.md): command examples, date modes, CSV export, raw requests, JSON policy, and flag mapping.
+- [Development and release](docs/development.md): local setup, testing, local install, tarball checks, and npm publishing flow.
 
-## Raw Read-only Request
-
-The raw escape hatch supports only `GET` and `HEAD`.
-
-```bash
-fpc request get /api/v1/dashboard_api/summary \
-  --query advertiser=chime \
-  --query tv=lg-tv
-```
-
-```bash
-fpc request head /api/v1/dashboard_api/advertisers
-```
-
-Raw requests use the same base URL, Bearer auth, path normalization, error handling, and redaction as high-level commands.
-
-## Date Modes
-
-Default mode is `registrationDateMode=auto`. In auto mode, pass impression dates and let the backend derive registration dates:
-
-```bash
---registration-date-mode auto \
---impression-start 2026-06-01 \
---impression-end 2026-06-30
-```
-
-Manual mode allows registration dates and `dateFilterMode=or`:
-
-```bash
---registration-date-mode manual \
---impression-start 2026-06-01 \
---impression-end 2026-06-30 \
---registration-start 2026-06-01 \
---registration-end 2026-06-30 \
---date-filter-mode or
-```
-
-## JSON Policy
-
-JSON output:
-
-- stdout contains JSON only.
-- diagnostics and warnings go to stderr.
-- errors use a stable shape:
-
-```json
-{
-  "error": {
-    "type": "auth_error",
-    "message": "Unauthorized",
-    "status": 401
-  }
-}
-```
-
-- tokens, cookies, and sensitive headers are not printed.
-- high-level JSON commands include API data and `_request` metadata, except CSV export which returns only file metadata.
-
-## Flag Mapping
-
-CLI flags use kebab-case and API query keys use the Dashboard contract:
-
-| CLI flag | API query |
-| --- | --- |
-| `--event-type` | `eventType` |
-| `--tv` | `tv` |
-| `--registration-date-mode` | `registrationDateMode` |
-| `--impression-start` | `impressionStartDate` |
-| `--impression-end` | `impressionEndDate` |
-| `--registration-start` | `registrationStartDate` |
-| `--registration-end` | `registrationEndDate` |
-| `--date-filter-mode` | `dateFilterMode` |
-| `--max-attribution-hours` | `maxImpressionToRegistration` |
-| `--per-page` | `perPage` |
-
-## Live Smoke Test
-
-Live calls are not part of the default test suite. When you have a token:
+## Common Commands
 
 ```bash
 fpc doctor
 fpc advertisers list
-```
-
-Unit tests use local fixtures/mocks only:
-
-```bash
-pnpm test
+fpc tv-platforms list --advertiser chime
+fpc categories list --advertiser chime --event-type registration --tv lg-tv
+fpc summary get --advertiser chime --event-type registration --tv lg-tv
+fpc records export direct-lg-ctv --advertiser chime --event-type registration --tv lg-tv --out ./direct-lg-ctv.csv
 ```
