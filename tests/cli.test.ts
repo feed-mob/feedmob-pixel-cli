@@ -6,6 +6,7 @@ import { buildProgram, main } from '../src/cli.js'
 import { loadConfig } from '../src/config.js'
 
 const tempDirs: string[] = []
+const noUpdateCheck = async () => undefined
 
 async function tempConfigDir() {
   const dir = await mkdtemp(join(tmpdir(), 'fpc-cli-'))
@@ -41,7 +42,7 @@ describe('cli', () => {
     }) as typeof process.stderr.write
 
     try {
-      await main(['node', 'fpc', '--version'])
+      await main(['node', 'fpc', '--version'], { updateCheck: noUpdateCheck })
     } finally {
       process.stdout.write = stdout
       process.stderr.write = stderr
@@ -50,6 +51,46 @@ describe('cli', () => {
 
     expect(output.trim()).toBe(packageJson.version)
     expect(errorOutput).toBe('')
+  })
+
+  test('version prints an update notice to stderr when a newer package is published', async () => {
+    const packageJson = JSON.parse(await readFile('package.json', 'utf8')) as {
+      version?: string
+    }
+    const stdout = process.stdout.write
+    const stderr = process.stderr.write
+    const previousExitCode = process.exitCode
+    let output = ''
+    let errorOutput = ''
+
+    process.exitCode = undefined
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      output += chunk.toString()
+      return true
+    }) as typeof process.stdout.write
+    process.stderr.write = ((chunk: string | Uint8Array) => {
+      errorOutput += chunk.toString()
+      return true
+    }) as typeof process.stderr.write
+
+    try {
+      await main(['node', 'fpc', '--version'], {
+        updateCheck: async () => ({
+          packageName: '@feedmob/feedmob-pixel-cli',
+          currentVersion: packageJson.version ?? '0.0.0',
+          latestVersion: '999.0.0',
+        }),
+      })
+    } finally {
+      process.stdout.write = stdout
+      process.stderr.write = stderr
+      process.exitCode = previousExitCode
+    }
+
+    expect(output.trim()).toBe(packageJson.version)
+    expect(errorOutput).toContain('fpc update available')
+    expect(errorOutput).toContain(`${packageJson.version} -> 999.0.0`)
+    expect(errorOutput).toContain('npm install -g @feedmob/feedmob-pixel-cli@latest')
   })
 
   test('top-level help does not advertise the legacy --json option', () => {
@@ -110,7 +151,7 @@ describe('cli', () => {
     }) as typeof process.stderr.write
 
     try {
-      await main(['node', 'fpc', 'init', '--base-url', 'http://localhost:3000'])
+      await main(['node', 'fpc', 'init', '--base-url', 'http://localhost:3000'], { updateCheck: noUpdateCheck })
     } finally {
       process.stdout.write = stdout
       process.stderr.write = stderr
@@ -150,7 +191,7 @@ describe('cli', () => {
     }) as typeof process.stderr.write
 
     try {
-      await main(['node', 'fpc', 'init', '--token-env-var', 'CUSTOM_FPC_TOKEN'])
+      await main(['node', 'fpc', 'init', '--token-env-var', 'CUSTOM_FPC_TOKEN'], { updateCheck: noUpdateCheck })
     } finally {
       process.stdout.write = stdout
       process.stderr.write = stderr
