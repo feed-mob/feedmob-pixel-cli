@@ -1,5 +1,7 @@
 import { FeedpixError } from './errors.js'
 
+export const DEFAULT_ATTRIBUTION_WINDOW_HOURS = 14 * 24
+
 export type HttpMethod = 'GET' | 'HEAD'
 
 export type QueryValue = string | number | boolean | null | undefined
@@ -16,6 +18,12 @@ export interface FilterOptions {
   registrationEnd?: string
   dateFilterMode?: string
   maxAttributionHours?: string
+}
+
+export interface AttributionWindow {
+  hours: number
+  days: number
+  source: 'default' | 'option'
 }
 
 export interface RequestMetadata {
@@ -156,6 +164,7 @@ export function buildDashboardUrl(baseUrl: string, path: string, query: QueryInp
 
 export function buildFilterQuery(options: FilterOptions): Record<string, string> {
   const registrationDateMode = options.registrationDateMode || 'auto'
+  const window = attributionWindow(options)
   if (!['auto', 'manual'].includes(registrationDateMode)) {
     throw new FeedpixError('validation_error', 'registration-date-mode must be auto or manual.')
   }
@@ -187,7 +196,7 @@ export function buildFilterQuery(options: FilterOptions): Record<string, string>
   setIfPresent(query, 'tv', options.tv)
   setIfPresent(query, 'impressionStartDate', options.impressionStart)
   setIfPresent(query, 'impressionEndDate', options.impressionEnd)
-  setIfPresent(query, 'maxImpressionToRegistration', options.maxAttributionHours)
+  query.maxImpressionToRegistration = String(window.hours)
 
   if (registrationDateMode === 'manual') {
     setIfPresent(query, 'registrationStartDate', options.registrationStart)
@@ -198,6 +207,28 @@ export function buildFilterQuery(options: FilterOptions): Record<string, string>
   }
 
   return query
+}
+
+export function attributionWindow(options: Pick<FilterOptions, 'maxAttributionHours'>): AttributionWindow {
+  const rawValue = options.maxAttributionHours?.trim()
+  if (!rawValue) {
+    return {
+      hours: DEFAULT_ATTRIBUTION_WINDOW_HOURS,
+      days: DEFAULT_ATTRIBUTION_WINDOW_HOURS / 24,
+      source: 'default',
+    }
+  }
+
+  const hours = Number(rawValue)
+  if (!Number.isInteger(hours) || hours <= 0) {
+    throw new FeedpixError('validation_error', 'max-attribution-hours must be a positive integer.')
+  }
+
+  return {
+    hours,
+    days: hours / 24,
+    source: 'option',
+  }
 }
 
 export function capPerPage(value: string | number | undefined): number {
