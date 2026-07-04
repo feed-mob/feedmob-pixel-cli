@@ -21,6 +21,25 @@ fpc --help
 fpc doctor
 ```
 
+## Update
+
+`fpc` checks the latest npm version on each run. If the installed version is behind, it prints an update notice to stderr while keeping stdout usable for normal command output.
+
+Check whether the global install is behind the latest published version:
+
+```bash
+fpc --version
+npm outdated -g @feedmob/feedmob-pixel-cli
+```
+
+If `npm outdated` prints a row for `@feedmob/feedmob-pixel-cli`, update and confirm the installed version:
+
+```bash
+npm install -g @feedmob/feedmob-pixel-cli@latest
+fpc --version
+fpc doctor
+```
+
 ## Quick Start
 
 Configure a Dashboard API token:

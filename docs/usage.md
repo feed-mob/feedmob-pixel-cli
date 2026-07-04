@@ -2,6 +2,43 @@
 
 `fpc` prints JSON to stdout by default. Diagnostics, warnings, and install guidance go to stderr or npm lifecycle output.
 
+## Install Updates
+
+`fpc` checks the latest npm version on each run. If the installed version is behind, it prints a notice to stderr:
+
+```text
+fpc update available: 0.1.5 -> 0.1.6
+Run: npm install -g @feedmob/feedmob-pixel-cli@latest
+```
+
+stdout remains reserved for normal command output, including JSON.
+
+Check the installed CLI version:
+
+```bash
+fpc --version
+```
+
+Check whether the globally installed npm package is outdated:
+
+```bash
+npm outdated -g @feedmob/feedmob-pixel-cli
+```
+
+No output means the global install is current. If npm prints a row for `@feedmob/feedmob-pixel-cli`, update to the latest published package:
+
+```bash
+npm install -g @feedmob/feedmob-pixel-cli@latest
+fpc --version
+fpc doctor
+```
+
+To see the latest published version without comparing it to your install:
+
+```bash
+npm view @feedmob/feedmob-pixel-cli version
+```
+
 ## Authentication
 
 Use a FeedMob Pixel API token. The recommended local setup is `~/.fpc/.env`:

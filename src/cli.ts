@@ -13,6 +13,11 @@ import { addTvPlatformsCommand } from './commands/tvPlatforms.js'
 import { CLI_VERSION, COMMAND_NAME, PROJECT_NAME } from './constants.js'
 import { FeedpixError } from './errors.js'
 import { writeError } from './output.js'
+import { checkForUpdate, formatUpdateNotice, type UpdateCheck } from './updateCheck.js'
+
+export interface MainOptions {
+  updateCheck?: UpdateCheck
+}
 
 export function buildProgram(): Command {
   const program = new Command()
@@ -37,11 +42,12 @@ export function buildProgram(): Command {
   return program
 }
 
-export async function main(argv: string[]): Promise<void> {
+export async function main(argv: string[], options: MainOptions = {}): Promise<void> {
   const program = buildProgram()
   program.exitOverride()
 
   try {
+    await writeUpdateNotice(options.updateCheck ?? checkForUpdate)
     await program.parseAsync(argv)
   } catch (error) {
     if (
@@ -56,6 +62,17 @@ export async function main(argv: string[]): Promise<void> {
         ? new FeedpixError('validation_error', error.message)
         : error
     process.exitCode = writeError(feedpixError, true)
+  }
+}
+
+async function writeUpdateNotice(updateCheck: UpdateCheck): Promise<void> {
+  try {
+    const notice = await updateCheck()
+    if (notice) {
+      process.stderr.write(formatUpdateNotice(notice))
+    }
+  } catch {
+    // Update checks must never break or pollute normal CLI behavior.
   }
 }
 
