@@ -33,7 +33,7 @@ export function writeError(error: unknown, json: boolean): number {
   if (json) {
     writeJson(jsonErrorPayload(feedpixError))
   } else {
-    process.stderr.write(`feedpix: ${redactSensitiveText(feedpixError.message)}\n`)
+    process.stderr.write(`fpc: ${redactSensitiveText(feedpixError.message)}\n`)
   }
   return feedpixError.exitCode
 }

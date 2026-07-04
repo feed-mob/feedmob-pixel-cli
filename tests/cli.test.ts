@@ -8,7 +8,7 @@ import { loadConfig } from '../src/config.js'
 const tempDirs: string[] = []
 
 async function tempConfigDir() {
-  const dir = await mkdtemp(join(tmpdir(), 'feedpix-cli-'))
+  const dir = await mkdtemp(join(tmpdir(), 'fpc-cli-'))
   tempDirs.push(dir)
   return dir
 }
@@ -41,7 +41,7 @@ describe('cli', () => {
     }) as typeof process.stderr.write
 
     try {
-      await main(['node', 'feedpix', '--version'])
+      await main(['node', 'fpc', '--version'])
     } finally {
       process.stdout.write = stdout
       process.stderr.write = stderr
@@ -63,7 +63,7 @@ describe('cli', () => {
     try {
       const program = buildProgram()
       program.exitOverride()
-      await program.parseAsync(['node', 'feedpix', '--json', 'init', '--base-url', 'http://localhost:3000'])
+      await program.parseAsync(['node', 'fpc', '--json', 'init', '--base-url', 'http://localhost:3000'])
     } finally {
       process.stdout.write = stdout
       if (previousConfigDir === undefined) {
@@ -91,7 +91,7 @@ describe('cli', () => {
       program.exitOverride()
       await program.parseAsync([
         'node',
-        'feedpix',
+        'fpc',
         '--json',
         'init',
         '--token-env-var',

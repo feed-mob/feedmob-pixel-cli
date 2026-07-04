@@ -7,7 +7,7 @@ import { loadConfig, writeConfig } from '../src/config.js'
 const tempDirs: string[] = []
 
 async function tempConfigDir() {
-  const dir = await mkdtemp(join(tmpdir(), 'feedpix-config-'))
+  const dir = await mkdtemp(join(tmpdir(), 'fpc-config-'))
   tempDirs.push(dir)
   return dir
 }
@@ -108,7 +108,7 @@ describe('config', () => {
 
   test('supports FEEDPIX_ENV_FILE for a custom local env file path', async () => {
     const dir = await tempConfigDir()
-    const customEnvFile = join(dir, 'feedpix.local.env')
+    const customEnvFile = join(dir, 'fpc.local.env')
     await writeFile(customEnvFile, 'FEEDMOB_DASHBOARD_API_TOKEN=fmpat_custom_env_file\n')
 
     const state = await loadConfig({
