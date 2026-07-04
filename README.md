@@ -68,26 +68,7 @@ fpc records list direct-lg-ctv \
 
 ## Configuration
 
-The production Dashboard URL is fixed in code:
-
-```bash
-https://feedmob-pixel-dashboard.feedmob.com/
-```
-
-It is not read from `config.json`, shell env, or the local `.env` file.
-
-Local config defaults to:
-
-- `~/.fpc/config.json`
-- `~/.fpc/.env`
-
-Token sources, in order:
-
-1. `FEEDMOB_PIXEL_API_TOKEN`, `FPC_TOKEN`, or legacy `FEEDPIX_TOKEN`
-2. the same token env vars from `~/.fpc/.env`, or the file named by `FPC_ENV_FILE`
-3. `~/.fpc/config.json` only if explicitly written with `fpc init --token ...`
-
-Prefer a local env file or shell env over storing tokens in config:
+`fpc` needs a FeedMob Pixel API token. For persistent local setup, store it in `~/.fpc/.env`:
 
 ```bash
 mkdir -p ~/.fpc
@@ -97,14 +78,14 @@ chmod 600 ~/.fpc/.env
 fpc doctor
 ```
 
-For a one-off shell session:
+For a one-off shell session, export the token before running commands:
 
 ```bash
 export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
 fpc doctor
 ```
 
-Avoid storing tokens in repo files, shell history, logs, screenshots, or generated fixtures.
+Keep `~/.fpc/.env` local to your machine. Avoid storing real tokens in repo files, shell history, logs, screenshots, or generated fixtures.
 
 ## More Docs
 
