@@ -75,7 +75,7 @@ export class DashboardClient {
       throw new FeedpixError('config_error', 'Dashboard base URL is not configured.')
     }
     if (!this.token) {
-      throw new FeedpixError('auth_error', 'API token is not configured. Set FEEDMOB_DASHBOARD_API_TOKEN.')
+      throw new FeedpixError('auth_error', 'API token is not configured. Set FEEDMOB_PIXEL_API_TOKEN.')
     }
 
     const url = buildDashboardUrl(this.baseUrl, path, query)

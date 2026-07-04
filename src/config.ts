@@ -14,7 +14,6 @@ export interface SourceValue {
 export interface FeedpixConfigFile {
   baseUrl?: string
   token?: string
-  tokenEnvVar?: string
 }
 
 export interface ConfigState {
@@ -37,7 +36,7 @@ export interface WriteConfigOptions {
 }
 
 export function defaultConfigDir(env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env): string {
-  return clean(env.FPC_CONFIG_DIR) || clean(env.FEEDPIX_CONFIG_DIR) || join(homedir(), '.fpc')
+  return clean(env.FPC_CONFIG_DIR) || join(homedir(), '.fpc')
 }
 
 export function configPath(configDir = defaultConfigDir()): string {
@@ -48,7 +47,7 @@ export function envPath(
   env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
   configDir = defaultConfigDir(env),
 ): string {
-  return clean(env.FPC_ENV_FILE) || clean(env.FEEDPIX_ENV_FILE) || join(configDir, '.env')
+  return clean(env.FPC_ENV_FILE) || join(configDir, '.env')
 }
 
 export async function loadConfig(options: LoadConfigOptions = {}): Promise<ConfigState> {
@@ -67,8 +66,8 @@ export async function loadConfig(options: LoadConfigOptions = {}): Promise<Confi
     baseUrl: { value: DEFAULT_BASE_URL, source: 'default' },
     token: sourceValue(
       clean(options.flagToken),
-      envValue(env, ...tokenEnvNames(rawConfig)),
-      envFileValue(localEnv, ...tokenEnvNames(rawConfig)),
+      envValue(env, ...tokenEnvNames()),
+      envFileValue(localEnv, ...tokenEnvNames()),
       clean(rawConfig.token),
     ),
   }
@@ -82,18 +81,10 @@ export async function writeConfig(config: FeedpixConfigFile, options: WriteConfi
     ...existing,
   }
   delete next.baseUrl
+  delete (next as Record<string, unknown>).tokenEnvVar
 
   if (config.token !== undefined) {
-    if (config.tokenEnvVar !== undefined) {
-      throw new FeedpixError('validation_error', 'Use either token or tokenEnvVar, not both.')
-    }
     next.token = requiredClean(config.token, 'token')
-    delete next.tokenEnvVar
-  }
-
-  if (config.tokenEnvVar !== undefined) {
-    next.tokenEnvVar = requiredEnvVarName(config.tokenEnvVar, 'tokenEnvVar')
-    delete next.token
   }
 
   await mkdir(dir, { recursive: true, mode: 0o700 })
@@ -201,16 +192,8 @@ function requiredClean(value: string | undefined, name: string): string {
   return cleaned
 }
 
-function requiredEnvVarName(value: string | undefined, name: string): string {
-  const cleaned = requiredClean(value, name)
-  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(cleaned)) {
-    throw new FeedpixError('validation_error', `${name} must be a valid environment variable name.`)
-  }
-  return cleaned
-}
-
-function tokenEnvNames(config: FeedpixConfigFile): string[] {
-  return ['FEEDMOB_DASHBOARD_API_TOKEN', 'FPC_TOKEN', 'FEEDPIX_TOKEN', clean(config.tokenEnvVar)].filter(
+function tokenEnvNames(): string[] {
+  return ['FEEDMOB_PIXEL_API_TOKEN', 'FPC_TOKEN', 'FEEDPIX_TOKEN'].filter(
     (name): name is string => Boolean(name),
   )
 }

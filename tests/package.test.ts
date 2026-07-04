@@ -37,6 +37,7 @@ describe('npm package metadata', () => {
     expect(packageJson.scripts?.prepack).toBe('npm run build')
     expect(packageJson.scripts?.postinstall).toBe('node ./scripts/postinstall.cjs')
     expect(packageJson.files).toContain('dist')
+    expect(packageJson.files).toContain('docs')
     expect(packageJson.files).toContain('scripts/postinstall.cjs')
   })
 
@@ -64,8 +65,9 @@ describe('npm package metadata', () => {
 
     expect(stdout).toContain('fpc installed - FeedMob Pixel Dashboard CLI')
     expect(stdout).toContain('Read-only Dashboard API queries')
-    expect(stdout).toContain('FEEDMOB_DASHBOARD_API_TOKEN')
-    expect(stdout).toContain('--token-env-var')
+    expect(stdout).toContain('FEEDMOB_PIXEL_API_TOKEN')
+    expect(stdout).toContain('chmod 600 ~/.fpc/.env')
+    expect(stdout).not.toContain('--token-env-var')
     expect(stdout).toContain('~/.fpc/config.json')
     expect(stdout).toContain('~/.fpc/.env')
     expect(stdout).toContain('fpc --version')

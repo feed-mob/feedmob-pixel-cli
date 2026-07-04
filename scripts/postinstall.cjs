@@ -14,13 +14,13 @@ Quick start:
      fpc --help
 
   2. Configure a Dashboard API token:
-     export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
+     mkdir -p ~/.fpc
+     chmod 700 ~/.fpc
+     printf '%s\\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' > ~/.fpc/.env
+     chmod 600 ~/.fpc/.env
 
      The production Dashboard URL is already configured:
      https://feedmob-pixel-dashboard.feedmob.com/
-
-     Or store only the token environment variable name:
-     fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
 
      Local config defaults to:
      ~/.fpc/config.json
