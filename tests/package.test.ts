@@ -37,6 +37,7 @@ describe('npm package metadata', () => {
     expect(packageJson.scripts?.prepack).toBe('npm run build')
     expect(packageJson.scripts?.postinstall).toBe('node ./scripts/postinstall.cjs')
     expect(packageJson.files).toContain('dist')
+    expect(packageJson.files).toContain('docs')
     expect(packageJson.files).toContain('scripts/postinstall.cjs')
   })
 

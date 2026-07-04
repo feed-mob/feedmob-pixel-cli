@@ -1,0 +1,202 @@
+# Usage Reference
+
+`fpc` prints JSON to stdout by default. Diagnostics, warnings, and install guidance go to stderr or npm lifecycle output.
+
+## Authentication
+
+Preferred auth:
+
+```bash
+export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
+fpc doctor
+```
+
+Custom token env var configured in `config.json`:
+
+```bash
+fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
+export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
+fpc doctor
+```
+
+Custom env file:
+
+```bash
+FPC_ENV_FILE=/path/to/fpc.env fpc doctor
+```
+
+Legacy `FEEDPIX_CONFIG_DIR` and `FEEDPIX_ENV_FILE` overrides are still supported as fallbacks.
+
+## Doctor
+
+```bash
+fpc doctor
+```
+
+When setup is missing, `doctor` exits successfully and returns machine-readable setup status:
+
+```json
+{
+  "setup": {
+    "ok": false,
+    "missing": ["token"]
+  }
+}
+```
+
+## Discovery First
+
+Start every new workflow by discovering valid values. Do not invent advertiser, event type, TV platform, or category values.
+
+```bash
+fpc advertisers list
+```
+
+```bash
+fpc tv-platforms list --advertiser chime
+```
+
+```bash
+fpc categories list \
+  --advertiser chime \
+  --event-type registration \
+  --tv lg-tv \
+  --registration-date-mode auto \
+  --impression-start 2026-06-01 \
+  --impression-end 2026-06-30
+```
+
+Use `category.value` or `category.slug` from `categories list` for records and exports. Only drill into categories where `canViewDetails` is `true`.
+
+## Summary
+
+```bash
+fpc summary get \
+  --advertiser chime \
+  --event-type registration \
+  --tv lg-tv \
+  --registration-date-mode auto \
+  --impression-start 2026-06-01 \
+  --impression-end 2026-06-30
+```
+
+## Records
+
+List one page:
+
+```bash
+fpc records list direct-lg-ctv \
+  --advertiser chime \
+  --event-type registration \
+  --tv lg-tv \
+  --page 1 \
+  --per-page 100
+```
+
+Fetch multiple pages:
+
+```bash
+fpc records list direct-lg-ctv \
+  --advertiser chime \
+  --event-type registration \
+  --tv lg-tv \
+  --all-pages \
+  --max-pages 5
+```
+
+`--per-page` defaults to `100` and is capped at `500`.
+
+## CSV Export
+
+CSV export writes the API CSV response to the required `--out` path and prints file metadata as JSON.
+
+```bash
+fpc records export direct-lg-ctv \
+  --advertiser chime \
+  --event-type registration \
+  --tv lg-tv \
+  --impression-start 2026-06-01 \
+  --impression-end 2026-06-30 \
+  --out ./direct-lg-ctv.csv
+```
+
+```json
+{
+  "path": "/absolute/path/direct-lg-ctv.csv",
+  "bytes": 123,
+  "contentType": "text/csv"
+}
+```
+
+## Raw Read-only Request
+
+The raw escape hatch supports only `GET` and `HEAD`.
+
+```bash
+fpc request get /api/v1/dashboard_api/summary \
+  --query advertiser=chime \
+  --query tv=lg-tv
+```
+
+```bash
+fpc request head /api/v1/dashboard_api/advertisers
+```
+
+Raw requests use the fixed production base URL, Bearer auth, path normalization, error handling, and redaction as high-level commands.
+
+## Date Modes
+
+Default mode is `registrationDateMode=auto`. In auto mode, pass impression dates and let the backend derive registration dates:
+
+```bash
+--registration-date-mode auto \
+--impression-start 2026-06-01 \
+--impression-end 2026-06-30
+```
+
+Manual mode allows registration dates and `dateFilterMode=or`:
+
+```bash
+--registration-date-mode manual \
+--impression-start 2026-06-01 \
+--impression-end 2026-06-30 \
+--registration-start 2026-06-01 \
+--registration-end 2026-06-30 \
+--date-filter-mode or
+```
+
+## JSON Policy
+
+- stdout contains JSON only.
+- diagnostics and warnings go to stderr.
+- errors use a stable shape:
+
+```json
+{
+  "error": {
+    "type": "auth_error",
+    "message": "Unauthorized",
+    "status": 401
+  }
+}
+```
+
+- tokens, cookies, and sensitive headers are not printed.
+- high-level JSON commands include API data and `_request` metadata, except CSV export which returns only file metadata.
+
+## Flag Mapping
+
+CLI flags use kebab-case and API query keys use the Dashboard contract:
+
+| CLI flag | API query |
+| --- | --- |
+| `--event-type` | `eventType` |
+| `--tv` | `tv` |
+| `--registration-date-mode` | `registrationDateMode` |
+| `--impression-start` | `impressionStartDate` |
+| `--impression-end` | `impressionEndDate` |
+| `--registration-start` | `registrationStartDate` |
+| `--registration-end` | `registrationEndDate` |
+| `--date-filter-mode` | `dateFilterMode` |
+| `--max-attribution-hours` | `maxImpressionToRegistration` |
+| `--per-page` | `perPage` |
