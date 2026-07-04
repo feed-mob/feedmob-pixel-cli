@@ -19,9 +19,6 @@ Quick start:
      The production Dashboard URL is already configured:
      https://feedmob-pixel-dashboard.feedmob.com/
 
-     Or store only the token environment variable name:
-     fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
-
      Local config defaults to:
      ~/.fpc/config.json
      ~/.fpc/.env

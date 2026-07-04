@@ -126,47 +126,44 @@ describe('cli', () => {
     expect(errorOutput).toContain("unknown option '--base-url'")
   })
 
-  test('init can store a token environment variable name without storing a token', async () => {
-    const dir = await tempConfigDir()
-    const previousConfigDir = process.env.FPC_CONFIG_DIR
-    const stdout = process.stdout.write
-    let output = ''
+  test('init help does not advertise the removed --token-env-var option', () => {
+    const initCommand = buildProgram().commands.find((command) => command.name() === 'init')
 
-    process.env.FPC_CONFIG_DIR = dir
+    expect(initCommand?.helpInformation()).not.toContain('--token-env-var')
+  })
+
+  test('init rejects the removed --token-env-var option', async () => {
+    const stdout = process.stdout.write
+    const stderr = process.stderr.write
+    const previousExitCode = process.exitCode
+    let output = ''
+    let errorOutput = ''
+
+    process.exitCode = undefined
     process.stdout.write = ((chunk: string | Uint8Array) => {
       output += chunk.toString()
       return true
     }) as typeof process.stdout.write
+    process.stderr.write = ((chunk: string | Uint8Array) => {
+      errorOutput += chunk.toString()
+      return true
+    }) as typeof process.stderr.write
 
     try {
-      const program = buildProgram()
-      program.exitOverride()
-      await program.parseAsync(['node', 'fpc', 'init', '--token-env-var', 'CUSTOM_FPC_TOKEN'])
+      await main(['node', 'fpc', 'init', '--token-env-var', 'CUSTOM_FPC_TOKEN'])
     } finally {
       process.stdout.write = stdout
-      if (previousConfigDir === undefined) {
-        delete process.env.FPC_CONFIG_DIR
-      } else {
-        process.env.FPC_CONFIG_DIR = previousConfigDir
-      }
+      process.stderr.write = stderr
+      process.exitCode = previousExitCode
     }
 
-    const state = await loadConfig({
-      env: {
-        CUSTOM_FPC_TOKEN: 'fmpat_custom_env',
+    expect(JSON.parse(output)).toEqual({
+      error: {
+        type: 'validation_error',
+        message: "error: unknown option '--token-env-var'",
       },
-      configDir: dir,
     })
-    expect(state.rawConfig).toEqual({
-      tokenEnvVar: 'CUSTOM_FPC_TOKEN',
-    })
-    expect(state.token).toEqual({ value: 'fmpat_custom_env', source: 'env' })
-    expect(JSON.parse(output)).toMatchObject({
-      path: join(dir, 'config.json'),
-      tokenStored: false,
-      tokenEnvVar: 'CUSTOM_FPC_TOKEN',
-    })
-    expect(JSON.parse(output)).not.toHaveProperty('baseUrl')
+    expect(errorOutput).toContain("unknown option '--token-env-var'")
   })
 
   test('keeps --json as a hidden no-op for existing command snippets', async () => {

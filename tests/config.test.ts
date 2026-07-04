@@ -182,7 +182,7 @@ describe('config', () => {
     expect(state.token).toEqual({ value: undefined, source: 'missing' })
   })
 
-  test('loads token from a configured environment variable name', async () => {
+  test('ignores tokenEnvVar from config file', async () => {
     const dir = await tempConfigDir()
     await writeFile(
       join(dir, 'config.json'),
@@ -196,10 +196,10 @@ describe('config', () => {
       configDir: dir,
     })
 
-    expect(state.token).toEqual({ value: 'fmpat_custom_env', source: 'env' })
+    expect(state.token).toEqual({ value: undefined, source: 'missing' })
   })
 
-  test('loads token from a configured environment variable in the local env file', async () => {
+  test('ignores tokenEnvVar from config file when reading the local env file', async () => {
     const dir = await tempConfigDir()
     await writeFile(
       join(dir, 'config.json'),
@@ -209,7 +209,7 @@ describe('config', () => {
 
     const state = await loadConfig({ env: {}, configDir: dir })
 
-    expect(state.token).toEqual({ value: 'fmpat_custom_env_file', source: 'env_file' })
+    expect(state.token).toEqual({ value: undefined, source: 'missing' })
   })
 
   test('writeConfig only stores a token when explicitly provided', async () => {
@@ -224,10 +224,12 @@ describe('config', () => {
     expect(withToken.token).toEqual({ value: 'fmpat_secret', source: 'config' })
   })
 
-  test('writeConfig can store a token environment variable name without storing a token', async () => {
+  test('writeConfig ignores tokenEnvVar input', async () => {
     const dir = await tempConfigDir()
+    const staleConfigInput = { tokenEnvVar: 'CUSTOM_FPC_TOKEN' } as unknown as Parameters<typeof writeConfig>[0]
+
     await writeConfig(
-      { tokenEnvVar: 'CUSTOM_FPC_TOKEN' },
+      staleConfigInput,
       { configDir: dir },
     )
 
@@ -238,9 +240,7 @@ describe('config', () => {
       configDir: dir,
     })
 
-    expect(state.rawConfig).toEqual({
-      tokenEnvVar: 'CUSTOM_FPC_TOKEN',
-    })
-    expect(state.token).toEqual({ value: 'fmpat_custom_env', source: 'env' })
+    expect(state.rawConfig).toEqual({})
+    expect(state.token).toEqual({ value: undefined, source: 'missing' })
   })
 })

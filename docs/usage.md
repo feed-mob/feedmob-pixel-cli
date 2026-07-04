@@ -11,14 +11,6 @@ export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
 fpc doctor
 ```
 
-Custom token env var configured in `config.json`:
-
-```bash
-fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
-export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
-fpc doctor
-```
-
 Custom env file:
 
 ```bash
