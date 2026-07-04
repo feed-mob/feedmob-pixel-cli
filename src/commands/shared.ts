@@ -5,8 +5,6 @@ import { FeedpixError } from '../errors.js'
 import { printTable, writeError, writeJson } from '../output.js'
 
 export interface GlobalOptions {
-  json?: boolean
-  baseUrl?: string
   token?: string
 }
 
@@ -19,12 +17,11 @@ export interface CliContext {
 export async function createContext(command: Command): Promise<CliContext> {
   const options = command.optsWithGlobals<GlobalOptions>()
   const config = await loadConfig({
-    flagBaseUrl: options.baseUrl,
     flagToken: options.token,
   })
 
   return {
-    json: Boolean(options.json),
+    json: true,
     config,
     client: new DashboardClient({
       baseUrl: config.baseUrl.value,
@@ -33,8 +30,8 @@ export async function createContext(command: Command): Promise<CliContext> {
   }
 }
 
-export function jsonEnabled(command: Command): boolean {
-  return Boolean(command.optsWithGlobals<GlobalOptions>().json)
+export function jsonEnabled(_command: Command): boolean {
+  return true
 }
 
 export async function runAction(command: Command, action: () => Promise<void>): Promise<void> {
@@ -75,15 +72,11 @@ export function filterOptions(options: Record<string, unknown>): FilterOptions {
 }
 
 export function writeJsonOrHuman<T>(
-  context: CliContext,
+  _context: CliContext,
   jsonValue: T,
-  humanWriter: (value: T) => void,
+  _humanWriter: (value: T) => void,
 ): void {
-  if (context.json) {
-    writeJson(jsonValue)
-  } else {
-    humanWriter(jsonValue)
-  }
+  writeJson(jsonValue)
 }
 
 export function withRequest<T>(response: DashboardResponse<T>): T & { _request: DashboardResponse<T>['request'] } {

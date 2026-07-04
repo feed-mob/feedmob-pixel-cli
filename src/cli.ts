@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { realpathSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { Command, CommanderError } from 'commander'
+import { Command, CommanderError, Option } from 'commander'
 import { addAdvertisersCommand } from './commands/advertisers.js'
 import { addCategoriesCommand } from './commands/categories.js'
 import { addDoctorCommand } from './commands/doctor.js'
@@ -21,7 +21,7 @@ export function buildProgram(): Command {
     .name(COMMAND_NAME)
     .description('FeedMob Pixel Dashboard data query CLI')
     .version(CLI_VERSION)
-    .option('--json', 'write machine-readable JSON to stdout')
+    .addOption(new Option('--json', 'legacy no-op; output is always JSON').hideHelp())
     .showHelpAfterError()
 
   addDoctorCommand(program)
@@ -32,6 +32,7 @@ export function buildProgram(): Command {
   addSummaryCommand(program)
   addRecordsCommand(program)
   addRequestCommand(program)
+  applyExitOverride(program)
 
   return program
 }
@@ -50,21 +51,19 @@ export async function main(argv: string[]): Promise<void> {
       return
     }
 
-    const json = argv.includes('--json')
     const feedpixError =
       error instanceof CommanderError
         ? new FeedpixError('validation_error', error.message)
         : error
-    process.exitCode = writeError(feedpixError, json)
+    process.exitCode = writeError(feedpixError, true)
   }
 }
 
 if (isMainModule()) {
   main(process.argv).catch((error) => {
-    const json = process.argv.includes('--json')
     process.exitCode = writeError(
       error instanceof Error ? error : new FeedpixError('api_error', `${PROJECT_NAME} failed`),
-      json,
+      true,
     )
   })
 }
@@ -76,5 +75,12 @@ function isMainModule(): boolean {
     return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1])
   } catch {
     return false
+  }
+}
+
+function applyExitOverride(command: Command): void {
+  command.exitOverride()
+  for (const child of command.commands) {
+    applyExitOverride(child)
   }
 }

@@ -8,7 +8,7 @@ export function addRequestCommand(program: Command): void {
 
   request
     .command('get')
-    .description('Run a raw GET request with configured auth and baseUrl')
+    .description('Run a raw GET request with configured auth')
     .argument('<path>', 'relative API path, for example /api/v1/dashboard_api/summary')
     .option('--query <key=value>', 'query parameter; repeat for multiple values', collectOption, [])
     .action(async (path, options, command) => {
@@ -29,7 +29,7 @@ export function addRequestCommand(program: Command): void {
 
   request
     .command('head')
-    .description('Run a raw HEAD request with configured auth and baseUrl')
+    .description('Run a raw HEAD request with configured auth')
     .argument('<path>', 'relative API path, for example /api/v1/dashboard_api/summary')
     .option('--query <key=value>', 'query parameter; repeat for multiple values', collectOption, [])
     .action(async (path, options, command) => {

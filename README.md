@@ -2,7 +2,7 @@
 
 `fpc` is a read-only TypeScript/Node CLI for querying the FeedMob Pixel Dashboard API from any working directory.
 
-It uses the Dashboard Bearer-token API, writes stable JSON with `--json`, and downloads category record exports as CSV.
+It uses the Dashboard Bearer-token API, writes stable JSON to stdout, and downloads category record exports as CSV.
 
 ## Install
 
@@ -18,12 +18,12 @@ After installation, configure a Dashboard API token before making API calls:
 
 ```bash
 export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
-fpc --json doctor
+fpc doctor
 ```
 
 The npm package is `@feedmob/feedmob-pixel-cli`; the installed command is `fpc`.
 
-Some npm versions hide successful install script output and only print `added packages`. If that happens, start with `fpc --help` and `fpc --json doctor`.
+Some npm versions hide successful install script output and only print `added packages`. If that happens, start with `fpc --help` and `fpc doctor`.
 
 Install from this repo for local testing:
 
@@ -76,13 +76,13 @@ The `Publish to npm` GitHub Actions workflow runs on pushes to `main`, checks wh
 
 ## Configure
 
-The production Dashboard base URL is fixed by default:
+The production Dashboard base URL is fixed in code:
 
 ```bash
 https://feedmob-pixel-dashboard.feedmob.com/
 ```
 
-You only need `fpc init` when you want to store token environment preferences or override the URL for local development.
+It is not read from `config.json`, shell env, or the local `.env` file. You only need `fpc init` when you want to store token environment preferences.
 
 Production with a configured token environment variable name:
 
@@ -90,20 +90,9 @@ Production with a configured token environment variable name:
 fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
 ```
 
-Local Rails/Dashboard:
+Config is stored at `~/.fpc/config.json`. Local environment variables may be stored in `~/.fpc/.env`.
 
-```bash
-fpc init --base-url http://localhost:3000
-```
-
-Config is stored at `~/.feedpix/config.json`. Local environment variables may be stored in `~/.feedpix/.env`.
-
-The CLI accepts a base URL from these sources, in order:
-
-1. `FEEDMOB_DASHBOARD_BASE_URL` or `FEEDPIX_BASE_URL`
-2. `~/.feedpix/.env`, or the file named by `FEEDPIX_ENV_FILE`
-3. `~/.feedpix/config.json`
-4. fixed default `https://feedmob-pixel-dashboard.feedmob.com/`
+Legacy `FEEDPIX_CONFIG_DIR` and `FEEDPIX_ENV_FILE` overrides are still supported as fallbacks.
 
 ## Authentication
 
@@ -113,7 +102,7 @@ Preferred auth:
 
 ```bash
 export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
-fpc --json doctor
+fpc doctor
 ```
 
 Custom token env var configured in `config.json`:
@@ -121,50 +110,49 @@ Custom token env var configured in `config.json`:
 ```bash
 fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
 export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
-fpc --json doctor
+fpc doctor
 ```
 
 Persistent local env file:
 
 ```bash
-mkdir -p ~/.feedpix
-chmod 700 ~/.feedpix
+mkdir -p ~/.fpc
+chmod 700 ~/.fpc
 printf '%s\n' \
-  'FEEDMOB_DASHBOARD_BASE_URL=https://feedmob-pixel-dashboard.feedmob.com' \
   'FEEDMOB_DASHBOARD_API_TOKEN=fmpat_xxx' \
-  > ~/.feedpix/.env
-chmod 600 ~/.feedpix/.env
-fpc --json doctor
+  > ~/.fpc/.env
+chmod 600 ~/.fpc/.env
+fpc doctor
 ```
 
 Persistent local env file with a configured token variable name:
 
 ```bash
 fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
-printf '%s\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' >> ~/.feedpix/.env
-fpc --json doctor
+printf '%s\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' >> ~/.fpc/.env
+fpc doctor
 ```
 
 Custom env file:
 
 ```bash
-FEEDPIX_ENV_FILE=/path/to/fpc.env fpc --json doctor
+FPC_ENV_FILE=/path/to/fpc.env fpc doctor
 ```
 
 Token sources, in order:
 
-1. `FEEDMOB_DASHBOARD_API_TOKEN` or `FEEDPIX_TOKEN`
+1. `FEEDMOB_DASHBOARD_API_TOKEN`, `FPC_TOKEN`, or legacy `FEEDPIX_TOKEN`
 2. the custom env var configured with `fpc init --token-env-var NAME`
-3. `FEEDMOB_DASHBOARD_API_TOKEN` or `FEEDPIX_TOKEN` from `~/.feedpix/.env`, or the file named by `FEEDPIX_ENV_FILE`
+3. `FEEDMOB_DASHBOARD_API_TOKEN`, `FPC_TOKEN`, or legacy `FEEDPIX_TOKEN` from `~/.fpc/.env`, or the file named by `FPC_ENV_FILE`
 4. the custom env var from that local env file
-5. `~/.feedpix/config.json` only if explicitly written with `fpc init --token ...`
+5. `~/.fpc/config.json` only if explicitly written with `fpc init --token ...`
 
 Avoid storing tokens in repo files, shell history, logs, screenshots, or generated fixtures.
 
 ## Doctor
 
 ```bash
-fpc --json doctor
+fpc doctor
 ```
 
 When setup is missing, `doctor` exits successfully and returns machine-readable setup status:
@@ -173,7 +161,7 @@ When setup is missing, `doctor` exits successfully and returns machine-readable 
 {
   "setup": {
     "ok": false,
-    "missing": ["baseUrl", "token"]
+    "missing": ["token"]
   }
 }
 ```
@@ -183,15 +171,15 @@ When setup is missing, `doctor` exits successfully and returns machine-readable 
 Start every new workflow by discovering valid values. Do not invent advertiser, event type, TV platform, or category values.
 
 ```bash
-fpc --json advertisers list
+fpc advertisers list
 ```
 
 ```bash
-fpc --json tv-platforms list --advertiser chime
+fpc tv-platforms list --advertiser chime
 ```
 
 ```bash
-fpc --json categories list \
+fpc categories list \
   --advertiser chime \
   --event-type registration \
   --tv lg-tv \
@@ -205,7 +193,7 @@ Use `category.value` or `category.slug` from `categories list` for records and e
 ## Summary
 
 ```bash
-fpc --json summary get \
+fpc summary get \
   --advertiser chime \
   --event-type registration \
   --tv lg-tv \
@@ -219,7 +207,7 @@ fpc --json summary get \
 List one page:
 
 ```bash
-fpc --json records list direct-lg-ctv \
+fpc records list direct-lg-ctv \
   --advertiser chime \
   --event-type registration \
   --tv lg-tv \
@@ -230,7 +218,7 @@ fpc --json records list direct-lg-ctv \
 Fetch multiple pages:
 
 ```bash
-fpc --json records list direct-lg-ctv \
+fpc records list direct-lg-ctv \
   --advertiser chime \
   --event-type registration \
   --tv lg-tv \
@@ -257,7 +245,7 @@ fpc records export direct-lg-ctv \
 JSON mode returns file metadata:
 
 ```bash
-fpc --json records export direct-lg-ctv \
+fpc records export direct-lg-ctv \
   --advertiser chime \
   --event-type registration \
   --tv lg-tv \
@@ -279,13 +267,13 @@ fpc --json records export direct-lg-ctv \
 The raw escape hatch supports only `GET` and `HEAD`.
 
 ```bash
-fpc --json request get /api/v1/dashboard_api/summary \
+fpc request get /api/v1/dashboard_api/summary \
   --query advertiser=chime \
   --query tv=lg-tv
 ```
 
 ```bash
-fpc --json request head /api/v1/dashboard_api/advertisers
+fpc request head /api/v1/dashboard_api/advertisers
 ```
 
 Raw requests use the same base URL, Bearer auth, path normalization, error handling, and redaction as high-level commands.
@@ -313,7 +301,7 @@ Manual mode allows registration dates and `dateFilterMode=or`:
 
 ## JSON Policy
 
-With `--json`:
+JSON output:
 
 - stdout contains JSON only.
 - diagnostics and warnings go to stderr.
@@ -354,8 +342,8 @@ CLI flags use kebab-case and API query keys use the Dashboard contract:
 Live calls are not part of the default test suite. When you have a token:
 
 ```bash
-fpc --json doctor
-fpc --json advertisers list
+fpc doctor
+fpc advertisers list
 ```
 
 Unit tests use local fixtures/mocks only:

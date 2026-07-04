@@ -6,7 +6,7 @@ fpc installed - FeedMob Pixel Dashboard CLI.
 What it does:
   - Read-only Dashboard API queries from any working directory.
   - Discover advertisers, TV platforms, categories, summaries, records, and CSV exports.
-  - Write stable JSON with --json and avoid printing API tokens.
+  - Write stable JSON by default and avoid printing API tokens.
 
 Quick start:
   1. Confirm the command is available:
@@ -22,12 +22,16 @@ Quick start:
      Or store only the token environment variable name:
      fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
 
+     Local config defaults to:
+     ~/.fpc/config.json
+     ~/.fpc/.env
+
   3. Check setup:
-     fpc --json doctor
+     fpc doctor
 
   4. Start discovery:
-     fpc --json advertisers list
-     fpc --json tv-platforms list --advertiser chime
+     fpc advertisers list
+     fpc tv-platforms list --advertiser chime
 
 Docs:
   https://github.com/feed-mob/feedmob-pixel-cli#readme
