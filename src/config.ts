@@ -29,7 +29,6 @@ export interface ConfigState {
 export interface LoadConfigOptions {
   env?: NodeJS.ProcessEnv | Record<string, string | undefined>
   configDir?: string
-  flagBaseUrl?: string
   flagToken?: string
 }
 
@@ -65,13 +64,7 @@ export async function loadConfig(options: LoadConfigOptions = {}): Promise<Confi
     configDir: dir,
     envPath: localEnvPath,
     rawConfig,
-    baseUrl: sourceValue(
-      clean(options.flagBaseUrl),
-      envValue(env, 'FEEDMOB_DASHBOARD_BASE_URL', 'FPC_BASE_URL', 'FEEDPIX_BASE_URL'),
-      envFileValue(localEnv, 'FEEDMOB_DASHBOARD_BASE_URL', 'FPC_BASE_URL', 'FEEDPIX_BASE_URL'),
-      clean(rawConfig.baseUrl),
-      DEFAULT_BASE_URL,
-    ),
+    baseUrl: { value: DEFAULT_BASE_URL, source: 'default' },
     token: sourceValue(
       clean(options.flagToken),
       envValue(env, ...tokenEnvNames(rawConfig)),
@@ -87,8 +80,8 @@ export async function writeConfig(config: FeedpixConfigFile, options: WriteConfi
   const existing = await readConfigFile(path)
   const next: FeedpixConfigFile = {
     ...existing,
-    baseUrl: requiredClean(config.baseUrl, 'baseUrl'),
   }
+  delete next.baseUrl
 
   if (config.token !== undefined) {
     if (config.tokenEnvVar !== undefined) {

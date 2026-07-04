@@ -72,7 +72,7 @@ export class DashboardClient {
     accept: string,
   ): Promise<DashboardResponse<T>> {
     if (!this.baseUrl) {
-      throw new FeedpixError('config_error', 'baseUrl is not configured. Run fpc init --base-url <url>.')
+      throw new FeedpixError('config_error', 'Dashboard base URL is not configured.')
     }
     if (!this.token) {
       throw new FeedpixError('auth_error', 'API token is not configured. Set FEEDMOB_DASHBOARD_API_TOKEN.')

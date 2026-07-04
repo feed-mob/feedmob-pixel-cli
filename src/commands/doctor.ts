@@ -1,6 +1,6 @@
 import type { Command } from 'commander'
 import { DashboardClient } from '../client.js'
-import { CLI_VERSION, COMMAND_NAME } from '../constants.js'
+import { CLI_VERSION, COMMAND_NAME, DEFAULT_BASE_URL } from '../constants.js'
 import { loadConfig } from '../config.js'
 import { toFeedpixError } from '../errors.js'
 import { writeJson } from '../output.js'
@@ -15,9 +15,8 @@ interface DoctorPayload {
     path: string
     envPath: string
     baseUrl: {
-      configured: boolean
       source: string
-      value?: string
+      value: string
     }
     token: {
       present: boolean
@@ -50,17 +49,14 @@ export function addDoctorCommand(program: Command): void {
     .description('Check config, auth, version, and Dashboard API reachability')
     .action(async (_options, command) => {
       await runAction(command, async () => {
-        const options = command.optsWithGlobals() as { baseUrl?: string; token?: string }
+        const options = command.optsWithGlobals() as { token?: string }
         const config = await loadConfig({
-          flagBaseUrl: options.baseUrl,
           flagToken: options.token,
         })
-        const missing = [
-          ...(config.baseUrl.value ? [] : ['baseUrl']),
-          ...(config.token.value ? [] : ['token']),
-        ]
+        const baseUrl = config.baseUrl.value ?? DEFAULT_BASE_URL
+        const missing = config.token.value ? [] : ['token']
 
-        const metadata = await checkMetadata(config.baseUrl.value, config.token.value)
+        const metadata = await checkMetadata(baseUrl, config.token.value)
         const payload: DoctorPayload = {
           cli: {
             name: COMMAND_NAME,
@@ -70,9 +66,8 @@ export function addDoctorCommand(program: Command): void {
             path: config.configPath,
             envPath: config.envPath,
             baseUrl: {
-              configured: Boolean(config.baseUrl.value),
               source: config.baseUrl.source,
-              ...(config.baseUrl.value ? { value: config.baseUrl.value } : {}),
+              value: baseUrl,
             },
             token: {
               present: Boolean(config.token.value),
@@ -98,8 +93,7 @@ export function addDoctorCommand(program: Command): void {
     })
 }
 
-async function checkMetadata(baseUrl?: string, token?: string): Promise<DoctorPayload['checks']['metadata']> {
-  if (!baseUrl) return { ok: false, skipped: true, reason: 'missing_base_url' }
+async function checkMetadata(baseUrl: string, token?: string): Promise<DoctorPayload['checks']['metadata']> {
   if (!token) return { ok: false, skipped: true, reason: 'missing_token' }
 
   const client = new DashboardClient({ baseUrl, token })
@@ -124,9 +118,7 @@ function printDoctor(payload: DoctorPayload): void {
   process.stdout.write(`${payload.cli.name} ${payload.cli.version}\n`)
   process.stdout.write(`config: ${payload.config.path}\n`)
   process.stdout.write(`env file: ${payload.config.envPath}\n`)
-  process.stdout.write(
-    `baseUrl: ${payload.config.baseUrl.configured ? payload.config.baseUrl.value : 'missing'} (${payload.config.baseUrl.source})\n`,
-  )
+  process.stdout.write(`baseUrl: ${payload.config.baseUrl.value} (${payload.config.baseUrl.source})\n`)
   process.stdout.write(`token: ${payload.config.token.present ? 'present' : 'missing'} (${payload.config.token.source})\n`)
   if (payload.config.tokenEnvVar) {
     process.stdout.write(`tokenEnvVar: ${payload.config.tokenEnvVar}\n`)

@@ -35,7 +35,7 @@ describe('config', () => {
     ).toBe('/tmp/fpc-config')
   })
 
-  test('reports missing baseUrl and token without throwing', async () => {
+  test('reports the fixed baseUrl and missing token without throwing', async () => {
     const dir = await tempConfigDir()
     const state = await loadConfig({ env: {}, configDir: dir })
 
@@ -44,7 +44,7 @@ describe('config', () => {
     expect(state.configPath).toBe(join(dir, 'config.json'))
   })
 
-  test('loads baseUrl and token from config file', async () => {
+  test('ignores baseUrl from config file', async () => {
     const dir = await tempConfigDir()
     await writeFile(
       join(dir, 'config.json'),
@@ -53,11 +53,11 @@ describe('config', () => {
 
     const state = await loadConfig({ env: {}, configDir: dir })
 
-    expect(state.baseUrl).toEqual({ value: 'https://dashboard.example.com', source: 'config' })
+    expect(state.baseUrl).toEqual({ value: 'https://feedmob-pixel-dashboard.feedmob.com/', source: 'default' })
     expect(state.token).toEqual({ value: 'fmpat_secret', source: 'config' })
   })
 
-  test('environment variables take precedence over config file values', async () => {
+  test('ignores baseUrl environment variables', async () => {
     const dir = await tempConfigDir()
     await writeFile(
       join(dir, 'config.json'),
@@ -72,11 +72,11 @@ describe('config', () => {
       configDir: dir,
     })
 
-    expect(state.baseUrl).toEqual({ value: 'https://from-env.example.com', source: 'env' })
+    expect(state.baseUrl).toEqual({ value: 'https://feedmob-pixel-dashboard.feedmob.com/', source: 'default' })
     expect(state.token).toEqual({ value: 'fmpat_env', source: 'env' })
   })
 
-  test('loads baseUrl and token from the local env file', async () => {
+  test('ignores baseUrl from the local env file', async () => {
     const dir = await tempConfigDir()
     await writeFile(
       join(dir, '.env'),
@@ -89,11 +89,11 @@ describe('config', () => {
 
     const state = await loadConfig({ env: {}, configDir: dir })
 
-    expect(state.baseUrl).toEqual({ value: 'https://from-env-file.example.com', source: 'env_file' })
+    expect(state.baseUrl).toEqual({ value: 'https://feedmob-pixel-dashboard.feedmob.com/', source: 'default' })
     expect(state.token).toEqual({ value: 'fmpat_env_file', source: 'env_file' })
   })
 
-  test('process env overrides env file and env file overrides config file', async () => {
+  test('process env overrides env file and env file overrides config file for token only', async () => {
     const dir = await tempConfigDir()
     await writeFile(
       join(dir, 'config.json'),
@@ -109,7 +109,7 @@ describe('config', () => {
     )
 
     const fromEnvFile = await loadConfig({ env: {}, configDir: dir })
-    expect(fromEnvFile.baseUrl).toEqual({ value: 'https://from-env-file.example.com', source: 'env_file' })
+    expect(fromEnvFile.baseUrl).toEqual({ value: 'https://feedmob-pixel-dashboard.feedmob.com/', source: 'default' })
     expect(fromEnvFile.token).toEqual({ value: 'fmpat_env_file', source: 'env_file' })
 
     const fromProcessEnv = await loadConfig({
@@ -118,7 +118,7 @@ describe('config', () => {
       },
       configDir: dir,
     })
-    expect(fromProcessEnv.baseUrl).toEqual({ value: 'https://from-env-file.example.com', source: 'env_file' })
+    expect(fromProcessEnv.baseUrl).toEqual({ value: 'https://feedmob-pixel-dashboard.feedmob.com/', source: 'default' })
     expect(fromProcessEnv.token).toEqual({ value: 'fmpat_env', source: 'env' })
   })
 
@@ -152,7 +152,7 @@ describe('config', () => {
     expect(state.token).toEqual({ value: 'fmpat_custom_env_file', source: 'env_file' })
   })
 
-  test('supports FPC base URL and token aliases', async () => {
+  test('supports the FPC token alias without allowing a baseUrl alias override', async () => {
     const dir = await tempConfigDir()
 
     const state = await loadConfig({
@@ -163,7 +163,7 @@ describe('config', () => {
       configDir: dir,
     })
 
-    expect(state.baseUrl).toEqual({ value: 'https://from-fpc-env.example.com', source: 'env' })
+    expect(state.baseUrl).toEqual({ value: 'https://feedmob-pixel-dashboard.feedmob.com/', source: 'default' })
     expect(state.token).toEqual({ value: 'fmpat_fpc_env', source: 'env' })
   })
 
@@ -199,12 +199,12 @@ describe('config', () => {
 
   test('writeConfig only stores a token when explicitly provided', async () => {
     const dir = await tempConfigDir()
-    await writeConfig({ baseUrl: 'https://dashboard.example.com' }, { configDir: dir })
+    await writeConfig({}, { configDir: dir })
 
     const withoutToken = await loadConfig({ env: {}, configDir: dir })
     expect(withoutToken.token.source).toBe('missing')
 
-    await writeConfig({ baseUrl: 'https://dashboard.example.com', token: 'fmpat_secret' }, { configDir: dir })
+    await writeConfig({ token: 'fmpat_secret' }, { configDir: dir })
     const withToken = await loadConfig({ env: {}, configDir: dir })
     expect(withToken.token).toEqual({ value: 'fmpat_secret', source: 'config' })
   })
@@ -212,7 +212,7 @@ describe('config', () => {
   test('writeConfig can store a token environment variable name without storing a token', async () => {
     const dir = await tempConfigDir()
     await writeConfig(
-      { baseUrl: 'https://dashboard.example.com', tokenEnvVar: 'CUSTOM_FPC_TOKEN' },
+      { tokenEnvVar: 'CUSTOM_FPC_TOKEN' },
       { configDir: dir },
     )
 
@@ -224,7 +224,6 @@ describe('config', () => {
     })
 
     expect(state.rawConfig).toEqual({
-      baseUrl: 'https://dashboard.example.com',
       tokenEnvVar: 'CUSTOM_FPC_TOKEN',
     })
     expect(state.token).toEqual({ value: 'fmpat_custom_env', source: 'env' })

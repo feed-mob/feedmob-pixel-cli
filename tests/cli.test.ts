@@ -52,18 +52,26 @@ describe('cli', () => {
     expect(errorOutput).toBe('')
   })
 
-  test('init accepts its local --base-url option and does not store a token by default', async () => {
+  test('top-level help does not advertise the legacy --json option', () => {
+    expect(buildProgram().helpInformation()).not.toContain('--json')
+  })
+
+  test('init does not write a baseUrl by default', async () => {
     const dir = await tempConfigDir()
     const previousConfigDir = process.env.FPC_CONFIG_DIR
     const stdout = process.stdout.write
+    let output = ''
 
     process.env.FPC_CONFIG_DIR = dir
-    process.stdout.write = (() => true) as typeof process.stdout.write
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      output += chunk.toString()
+      return true
+    }) as typeof process.stdout.write
 
     try {
       const program = buildProgram()
       program.exitOverride()
-      await program.parseAsync(['node', 'fpc', '--json', 'init', '--base-url', 'http://localhost:3000'])
+      await program.parseAsync(['node', 'fpc', 'init'])
     } finally {
       process.stdout.write = stdout
       if (previousConfigDir === undefined) {
@@ -74,29 +82,66 @@ describe('cli', () => {
     }
 
     const state = await loadConfig({ env: {}, configDir: dir })
-    expect(state.baseUrl).toEqual({ value: 'http://localhost:3000', source: 'config' })
+    expect(state.rawConfig).toEqual({})
+    expect(state.baseUrl).toEqual({ value: 'https://feedmob-pixel-dashboard.feedmob.com/', source: 'default' })
     expect(state.token.source).toBe('missing')
+    expect(JSON.parse(output)).toMatchObject({
+      path: join(dir, 'config.json'),
+      tokenStored: false,
+    })
+    expect(JSON.parse(output)).not.toHaveProperty('baseUrl')
+  })
+
+  test('init rejects the removed --base-url option', async () => {
+    const stdout = process.stdout.write
+    const stderr = process.stderr.write
+    const previousExitCode = process.exitCode
+    let output = ''
+    let errorOutput = ''
+
+    process.exitCode = undefined
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      output += chunk.toString()
+      return true
+    }) as typeof process.stdout.write
+    process.stderr.write = ((chunk: string | Uint8Array) => {
+      errorOutput += chunk.toString()
+      return true
+    }) as typeof process.stderr.write
+
+    try {
+      await main(['node', 'fpc', 'init', '--base-url', 'http://localhost:3000'])
+    } finally {
+      process.stdout.write = stdout
+      process.stderr.write = stderr
+      process.exitCode = previousExitCode
+    }
+
+    expect(JSON.parse(output)).toEqual({
+      error: {
+        type: 'validation_error',
+        message: "error: unknown option '--base-url'",
+      },
+    })
+    expect(errorOutput).toContain("unknown option '--base-url'")
   })
 
   test('init can store a token environment variable name without storing a token', async () => {
     const dir = await tempConfigDir()
     const previousConfigDir = process.env.FPC_CONFIG_DIR
     const stdout = process.stdout.write
+    let output = ''
 
     process.env.FPC_CONFIG_DIR = dir
-    process.stdout.write = (() => true) as typeof process.stdout.write
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      output += chunk.toString()
+      return true
+    }) as typeof process.stdout.write
 
     try {
       const program = buildProgram()
       program.exitOverride()
-      await program.parseAsync([
-        'node',
-        'fpc',
-        '--json',
-        'init',
-        '--token-env-var',
-        'CUSTOM_FPC_TOKEN',
-      ])
+      await program.parseAsync(['node', 'fpc', 'init', '--token-env-var', 'CUSTOM_FPC_TOKEN'])
     } finally {
       process.stdout.write = stdout
       if (previousConfigDir === undefined) {
@@ -113,9 +158,45 @@ describe('cli', () => {
       configDir: dir,
     })
     expect(state.rawConfig).toEqual({
-      baseUrl: 'https://feedmob-pixel-dashboard.feedmob.com/',
       tokenEnvVar: 'CUSTOM_FPC_TOKEN',
     })
     expect(state.token).toEqual({ value: 'fmpat_custom_env', source: 'env' })
+    expect(JSON.parse(output)).toMatchObject({
+      path: join(dir, 'config.json'),
+      tokenStored: false,
+      tokenEnvVar: 'CUSTOM_FPC_TOKEN',
+    })
+    expect(JSON.parse(output)).not.toHaveProperty('baseUrl')
+  })
+
+  test('keeps --json as a hidden no-op for existing command snippets', async () => {
+    const dir = await tempConfigDir()
+    const previousConfigDir = process.env.FPC_CONFIG_DIR
+    const stdout = process.stdout.write
+    let output = ''
+
+    process.env.FPC_CONFIG_DIR = dir
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      output += chunk.toString()
+      return true
+    }) as typeof process.stdout.write
+
+    try {
+      const program = buildProgram()
+      program.exitOverride()
+      await program.parseAsync(['node', 'fpc', '--json', 'init'])
+    } finally {
+      process.stdout.write = stdout
+      if (previousConfigDir === undefined) {
+        delete process.env.FPC_CONFIG_DIR
+      } else {
+        process.env.FPC_CONFIG_DIR = previousConfigDir
+      }
+    }
+
+    expect(JSON.parse(output)).toMatchObject({
+      path: join(dir, 'config.json'),
+      tokenStored: false,
+    })
   })
 })
