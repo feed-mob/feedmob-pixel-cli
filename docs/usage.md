@@ -4,7 +4,7 @@
 
 ## Authentication
 
-Preferred persistent local auth:
+Use a FeedMob Pixel API token. The recommended local setup is `~/.fpc/.env`:
 
 ```bash
 mkdir -p ~/.fpc
@@ -14,16 +14,20 @@ chmod 600 ~/.fpc/.env
 fpc doctor
 ```
 
-One-off shell auth:
+This keeps the token local to your machine and out of project files.
+
+For a one-off shell session:
 
 ```bash
 export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
 fpc doctor
 ```
 
-Custom env file:
+For automation or a non-default env file, put the same variable in a private file and point `FPC_ENV_FILE` at it:
 
 ```bash
+printf '%s\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' > /path/to/fpc.env
+chmod 600 /path/to/fpc.env
 FPC_ENV_FILE=/path/to/fpc.env fpc doctor
 ```
 
@@ -142,7 +146,7 @@ fpc request get /api/v1/dashboard_api/summary \
 fpc request head /api/v1/dashboard_api/advertisers
 ```
 
-Raw requests use the fixed production base URL, Bearer auth, path normalization, error handling, and redaction as high-level commands.
+Raw requests use the same Bearer auth, path normalization, error handling, and redaction as high-level commands.
 
 ## Date Modes
 

@@ -19,13 +19,6 @@ Quick start:
      printf '%s\\n' 'FEEDMOB_PIXEL_API_TOKEN=fmpat_xxx' > ~/.fpc/.env
      chmod 600 ~/.fpc/.env
 
-     The production Dashboard URL is already configured:
-     https://feedmob-pixel-dashboard.feedmob.com/
-
-     Local config defaults to:
-     ~/.fpc/config.json
-     ~/.fpc/.env
-
   3. Check setup:
      fpc doctor
 
