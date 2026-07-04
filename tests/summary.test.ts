@@ -2,27 +2,42 @@ import { describe, expect, test } from 'vitest'
 import { summaryWithAttributedRecords, type SummaryResponse } from '../src/commands/summary.js'
 
 describe('summary attributed records', () => {
-  test('adds records for categories that have assisted counts', async () => {
+  test('adds attributed records and totals only for Direct CTV categories', async () => {
     const summary: SummaryResponse = {
-      total: 10,
-      totalEvents: 10,
-      totalRegistrations: 10,
-      assistedTotal: 3,
+      total: 33729,
+      totalEvents: 33729,
+      totalRegistrations: 33729,
+      assistedTotal: 986,
       categories: [
         {
           name: 'Peer-to-Peer Viral Funnel',
-          count: 5,
-          pct: 50,
+          count: 10534,
+          pct: 31.231,
           slug: 'peer-to-peer-viral-funnel',
           canViewDetails: false,
           assistedCount: 2,
         },
         {
           name: 'Direct / Untracked',
-          count: 4,
-          pct: 40,
+          count: 3633,
+          pct: 10.777,
           slug: 'direct-untracked',
           canViewDetails: false,
+          assistedCount: 0,
+        },
+        {
+          name: 'Direct - LG CTV',
+          count: 71,
+          pct: 0.211,
+          slug: 'direct-lg-ctv',
+          canViewDetails: true,
+        },
+        {
+          name: 'Direct - TCL CTV',
+          count: 29,
+          pct: 0.086,
+          slug: 'direct-tcl-ctv',
+          canViewDetails: true,
           assistedCount: 0,
         },
         {
@@ -47,7 +62,7 @@ describe('summary attributed records', () => {
       allPages: true,
       fetchRecords: async (category, page, perPage) => {
         requested.push(`${category.slug}:${page}:${perPage}`)
-        if (category.slug === 'peer-to-peer-viral-funnel') {
+        if (category.slug === 'direct-lg-ctv') {
           return {
             records: [{ conversionId: 'a' }, { conversionId: 'b' }],
             pagination: { page, perPage, total: 2, totalPages: 1 },
@@ -61,47 +76,49 @@ describe('summary attributed records', () => {
       },
     })
 
-    expect(requested).toEqual(['peer-to-peer-viral-funnel:1:100', 'other-marketing-funnel:1:100'])
+    expect(requested).toEqual(['direct-lg-ctv:1:100', 'direct-tcl-ctv:1:100'])
     expect(result.attributionWindow).toEqual({
       hours: 336,
       days: 14,
       source: 'default',
     })
+    expect(result.assistedTotal).toBe(986)
+    expect(result.totalRegistrations).toBe(33729)
     expect(result.attributed).toEqual({
-      total: 3,
+      total: 100,
       records: [
         {
-          categorySlug: 'peer-to-peer-viral-funnel',
-          categoryName: 'Peer-to-Peer Viral Funnel',
-          categoryAssistedCount: 2,
+          categorySlug: 'direct-lg-ctv',
+          categoryName: 'Direct - LG CTV',
+          categoryAssistedCount: 0,
           conversionId: 'a',
         },
         {
-          categorySlug: 'peer-to-peer-viral-funnel',
-          categoryName: 'Peer-to-Peer Viral Funnel',
-          categoryAssistedCount: 2,
+          categorySlug: 'direct-lg-ctv',
+          categoryName: 'Direct - LG CTV',
+          categoryAssistedCount: 0,
           conversionId: 'b',
         },
         {
-          categorySlug: 'other-marketing-funnel',
-          categoryName: 'Other Marketing Funnel',
-          categoryAssistedCount: 1,
+          categorySlug: 'direct-tcl-ctv',
+          categoryName: 'Direct - TCL CTV',
+          categoryAssistedCount: 0,
           conversionId: 'c',
         },
       ],
       categories: [
         {
-          slug: 'peer-to-peer-viral-funnel',
-          name: 'Peer-to-Peer Viral Funnel',
-          assistedCount: 2,
+          slug: 'direct-lg-ctv',
+          name: 'Direct - LG CTV',
+          assistedCount: 0,
           recordsFetched: 2,
           recordsTotal: 2,
           pagesFetched: 1,
         },
         {
-          slug: 'other-marketing-funnel',
-          name: 'Other Marketing Funnel',
-          assistedCount: 1,
+          slug: 'direct-tcl-ctv',
+          name: 'Direct - TCL CTV',
+          assistedCount: 0,
           recordsFetched: 1,
           recordsTotal: 1,
           pagesFetched: 1,

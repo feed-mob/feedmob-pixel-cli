@@ -122,8 +122,10 @@ fpc summary get \
 ```
 
 The summary JSON includes the dashboard totals, category counts, the current attribution window under
-`attributionWindow`, and an `attributed` object. `attributed.records` contains the attributed registration records
-from categories whose summary `assistedCount` is greater than zero.
+`attributionWindow`, and an `attributed` object. `attributed.total` is the dashboard's attributed registration count:
+the sum of categories such as `Direct - LG CTV` and `Direct - TCL CTV`. `attributed.records` contains records from
+those Direct CTV categories. `assistedTotal` and `totalRegistrations` correspond to the dashboard's assisted
+registration and total registration figures.
 
 If `--max-attribution-hours` is omitted, `fpc` uses a 14-day attribution window (`336` hours). Explicit values are
 also reflected in `attributionWindow`.

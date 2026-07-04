@@ -118,9 +118,9 @@ export async function summaryWithAttributedRecords<TRecord = unknown>(
   summary: SummaryResponse,
   options: SummaryWithAttributedRecordsOptions<TRecord>,
 ): Promise<SummaryWithAttributedRecords<AttributedRecord<TRecord>>> {
-  const attributedCategories = summary.categories.filter((category) => (category.assistedCount ?? 0) > 0)
+  const attributedCategories = summary.categories.filter(isDirectCtvCategory)
   const attributed: AttributedSummary<AttributedRecord<TRecord>> = {
-    total: summary.assistedTotal,
+    total: attributedCategories.reduce((total, category) => total + category.count, 0),
     records: [],
     categories: [],
   }
@@ -150,6 +150,16 @@ export async function summaryWithAttributedRecords<TRecord = unknown>(
     attributionWindow: options.attributionWindow,
     attributed,
   }
+}
+
+function isDirectCtvCategory(category: SummaryCategory): boolean {
+  const slug = category.slug.trim().toLowerCase()
+  if (slug.startsWith('direct-') && slug.endsWith('-ctv')) {
+    return true
+  }
+
+  const name = category.name.trim().replace(/\s+/g, ' ')
+  return /^direct\s*-\s*.+\sctv$/i.test(name)
 }
 
 type AttributedRecord<TRecord> = TRecord & {

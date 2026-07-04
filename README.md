@@ -77,8 +77,9 @@ fpc summary get \
 ```
 
 Summary output includes totals, category counts, the current attribution window under `attributionWindow`, and
-attributed records under `attributed.records`. If `--max-attribution-hours` is omitted, `fpc` uses 14 days (`336`
-hours).
+Direct CTV attributed records under `attributed.records`. `attributed.total` is the sum of Direct CTV category
+counts, while `assistedTotal` and `totalRegistrations` correspond to the dashboard's assisted and total registration
+figures. If `--max-attribution-hours` is omitted, `fpc` uses 14 days (`336` hours).
 
 ```bash
 fpc records list direct-lg-ctv \
