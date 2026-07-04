@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const message = `
-feedpix installed - FeedMob Pixel Dashboard CLI.
+fpc installed - FeedMob Pixel Dashboard CLI.
 
 What it does:
   - Read-only Dashboard API queries from any working directory.
@@ -10,8 +10,8 @@ What it does:
 
 Quick start:
   1. Confirm the command is available:
-     feedpix --version
-     feedpix --help
+     fpc --version
+     fpc --help
 
   2. Configure a Dashboard API token:
      export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
@@ -20,14 +20,14 @@ Quick start:
      https://feedmob-pixel-dashboard.feedmob.com/
 
      Or store only the token environment variable name:
-     feedpix init --token-env-var FEEDMOB_PIXEL_API_TOKEN
+     fpc init --token-env-var FEEDMOB_PIXEL_API_TOKEN
 
   3. Check setup:
-     feedpix --json doctor
+     fpc --json doctor
 
   4. Start discovery:
-     feedpix --json advertisers list
-     feedpix --json tv-platforms list --advertiser chime
+     fpc --json advertisers list
+     fpc --json tv-platforms list --advertiser chime
 
 Docs:
   https://github.com/feed-mob/feedmob-pixel-cli#readme

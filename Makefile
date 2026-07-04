@@ -1,7 +1,7 @@
 PNPM ?= pnpm
 PREFIX ?= $(HOME)/.local
 BIN_DIR ?= $(PREFIX)/bin
-BIN ?= feedpix
+BIN ?= fpc
 
 .PHONY: install build test install-local
 
