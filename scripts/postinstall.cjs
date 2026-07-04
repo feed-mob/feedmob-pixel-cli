@@ -14,7 +14,7 @@ Quick start:
      fpc --help
 
   2. Configure a Dashboard API token:
-     export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
+     export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
 
      The production Dashboard URL is already configured:
      https://feedmob-pixel-dashboard.feedmob.com/

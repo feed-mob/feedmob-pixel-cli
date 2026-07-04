@@ -7,7 +7,7 @@
 Preferred auth:
 
 ```bash
-export FEEDMOB_DASHBOARD_API_TOKEN='fmpat_xxx'
+export FEEDMOB_PIXEL_API_TOKEN='fmpat_xxx'
 fpc doctor
 ```
 
@@ -24,8 +24,6 @@ Custom env file:
 ```bash
 FPC_ENV_FILE=/path/to/fpc.env fpc doctor
 ```
-
-Legacy `FEEDPIX_CONFIG_DIR` and `FEEDPIX_ENV_FILE` overrides are still supported as fallbacks.
 
 ## Doctor
 

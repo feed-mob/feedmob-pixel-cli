@@ -37,7 +37,7 @@ export interface WriteConfigOptions {
 }
 
 export function defaultConfigDir(env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env): string {
-  return clean(env.FPC_CONFIG_DIR) || clean(env.FEEDPIX_CONFIG_DIR) || join(homedir(), '.fpc')
+  return clean(env.FPC_CONFIG_DIR) || join(homedir(), '.fpc')
 }
 
 export function configPath(configDir = defaultConfigDir()): string {
@@ -48,7 +48,7 @@ export function envPath(
   env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
   configDir = defaultConfigDir(env),
 ): string {
-  return clean(env.FPC_ENV_FILE) || clean(env.FEEDPIX_ENV_FILE) || join(configDir, '.env')
+  return clean(env.FPC_ENV_FILE) || join(configDir, '.env')
 }
 
 export async function loadConfig(options: LoadConfigOptions = {}): Promise<ConfigState> {
@@ -210,7 +210,7 @@ function requiredEnvVarName(value: string | undefined, name: string): string {
 }
 
 function tokenEnvNames(config: FeedpixConfigFile): string[] {
-  return ['FEEDMOB_DASHBOARD_API_TOKEN', 'FPC_TOKEN', 'FEEDPIX_TOKEN', clean(config.tokenEnvVar)].filter(
+  return ['FEEDMOB_PIXEL_API_TOKEN', 'FPC_TOKEN', 'FEEDPIX_TOKEN', clean(config.tokenEnvVar)].filter(
     (name): name is string => Boolean(name),
   )
 }
