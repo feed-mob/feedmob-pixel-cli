@@ -76,6 +76,10 @@ fpc summary get \
   --impression-end 2026-06-30
 ```
 
+Summary output includes totals, category counts, the current attribution window under `attributionWindow`, and
+attributed records under `attributed.records`. If `--max-attribution-hours` is omitted, `fpc` uses 14 days (`336`
+hours).
+
 ```bash
 fpc records list direct-lg-ctv \
   --advertiser chime \

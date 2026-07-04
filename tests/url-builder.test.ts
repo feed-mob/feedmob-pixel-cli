@@ -52,6 +52,12 @@ describe('URL builder', () => {
     })
   })
 
+  test('defaults attribution window to 14 days for filtered endpoints', () => {
+    expect(buildFilterQuery({ advertiser: 'chime' })).toMatchObject({
+      maxImpressionToRegistration: '336',
+    })
+  })
+
   test('rejects dateFilterMode=or unless registrationDateMode is manual', () => {
     expect(() =>
       buildFilterQuery({

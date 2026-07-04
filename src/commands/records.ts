@@ -170,7 +170,7 @@ export function addRecordsCommand(program: Command): void {
   })
 }
 
-function categoryRecordsPath(category: string, exportCsv: boolean): string {
+export function categoryRecordsPath(category: string, exportCsv: boolean): string {
   const encoded = encodeURIComponent(category)
   return `/api/v1/dashboard_api/categories/${encoded}/records${exportCsv ? '/export' : ''}`
 }

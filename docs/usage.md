@@ -121,6 +121,27 @@ fpc summary get \
   --impression-end 2026-06-30
 ```
 
+The summary JSON includes the dashboard totals, category counts, the current attribution window under
+`attributionWindow`, and an `attributed` object. `attributed.records` contains the attributed registration records
+from categories whose summary `assistedCount` is greater than zero.
+
+If `--max-attribution-hours` is omitted, `fpc` uses a 14-day attribution window (`336` hours). Explicit values are
+also reflected in `attributionWindow`.
+
+By default, `summary get` fetches all attributed record pages with `--attributed-per-page 500`. Use
+`--attributed-max-pages` to limit how many record pages are fetched per attributed category:
+
+```bash
+fpc summary get \
+  --advertiser chime \
+  --event-type registration \
+  --tv tcl-tv \
+  --impression-start 2026-07-03 \
+  --impression-end 2026-07-03 \
+  --max-attribution-hours 72 \
+  --attributed-max-pages 1
+```
+
 ## Records
 
 List one page:
