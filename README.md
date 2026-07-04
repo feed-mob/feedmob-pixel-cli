@@ -110,6 +110,20 @@ fpc doctor
 
 Keep `~/.fpc/.env` local to your machine. Avoid storing real tokens in repo files, shell history, logs, screenshots, or generated fixtures.
 
+## Agent Skill
+
+A companion Agent Skill is available in the `feed-mob/skills` repository: [feedmob-pixel-cli](https://github.com/feed-mob/skills/tree/main/skills/feedmob-pixel-cli).
+Use it when asking Codex, Claude Code, or another Agent Skills-compatible assistant to query FeedMob Pixel Dashboard data with `fpc`.
+
+The skill guides agents to:
+
+- verify the local `fpc` install and run `fpc doctor` before querying;
+- keep Dashboard API tokens local and out of repos, logs, screenshots, and generated fixtures;
+- discover advertiser, event type, TV platform, and category values before using them;
+- use `summary get`, `records list`, and `records export` for read-only Dashboard data workflows;
+- use raw `GET` or `HEAD` requests only when the high-level commands do not cover the read;
+- apply the correct date-mode rules, including `--registration-date-mode auto` for linked impression/registration-date behavior and `manual` for explicit registration date ranges.
+
 ## More Docs
 
 - [Usage reference](docs/usage.md): command examples, date modes, CSV export, raw requests, JSON policy, and flag mapping.
